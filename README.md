@@ -19,31 +19,25 @@ GuinaOS is an educational/experimental project that simulates a complete (but mi
 
 ## 🏗️ Architecture
 
-The system uses a strict 4-layer isolation model:
+The system uses a strict 4-layer isolation model for maximum separation between emulation, security and interface.
 
-```mermaid
-graph TD
-    User([User Browser]) -- WebSocket --- Server[Layer 4: Web Bridge (FastAPI + WebSockets)]
-    Server --- Kernel[Layer 3: Kernel Shell (Command interpreter)]
-    Kernel --- CPU[Layer 2: Virtual CPU (Opcode fetch & execute)]
-    Kernel --- VFS[Layer 1: Virtual File System (Encrypted sectors)]
-    CPU --- Security[Layer 0: Crypto Core (XOR + shuffled charset)]
-    VFS --- Security
+**Layer 0 – Security**  
+Handles deterministic XOR encryption/decryption using fixed seed (2026) + shuffled 95-character ASCII table.
 
-    style User fill:#00f3ff,stroke:#333,color:#000
-    style Security fill:#bc13fe,stroke:#333,color:#fff
-Layer Breakdown
+**Layer 1 – VFS (Virtual File System)**  
+Manages the encrypted virtual disk (`guina_hd_proprietary.json`) with sector-based storage (directories as sectors + binary file blobs).
 
-Layer 0 – Security
-Handles deterministic encryption/decryption (fixed seed 2026 + shuffled 95-char ASCII table)
-Layer 1 – VFS
-Manages the virtual disk (guina_hd_proprietary.json) with sector-based storage (directories + binary blobs)
-Layer 2 – CPU
-Fetches encrypted bytes → decrypts opcodes on-the-fly → executes instructions
-Layer 3 – Kernel
-Command interpreter (importar, executar, sonar, etc.)
-Layer 4 – Interface
-FastAPI server that bridges WebSocket → HTML5 terminal
+**Layer 2 – Virtual CPU**  
+The execution engine: fetches encrypted bytes from VFS → decrypts opcodes on-the-fly → executes instructions in registers.
+
+**Layer 3 – Kernel Shell**  
+Command interpreter that understands high-level commands like `importar`, `executar`, `sonar`.
+
+**Layer 4 – Web Bridge / Interface**  
+FastAPI backend + WebSockets that connects the browser terminal to the kernel, streaming output in real-time.
+
+Flow summary:  
+User Browser ↔ WebSocket ↔ FastAPI (Layer 4) ↔ Kernel Shell (Layer 3) ↔ Virtual CPU (Layer 2) & VFS (Layer 1) ↔ Crypto Core (Layer 0)
 
 🛠️ Installation & Quick Start
 Prerequisites
