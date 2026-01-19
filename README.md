@@ -71,21 +71,31 @@ jonas.architect:~ $ importar binario_seguro.es
 jonas.architect:~ $ executar binario_seguro.es
 Instruction Set (v1.1 – Stable)
 
-MnemonicHexDescriptionModern Equivalentmaterializar0x10Load value into REG_AMOV EAX, valduplicar0x11Copy REG_A → REG_BMOV EBX, EAXfundir0x20Add REG_B to REG_AADD EAX, EBXdrenar0x21Subtract REG_B from REG_ASUB EAX, EBXcaptar0x50Read from sensor / inputSTDIN / SCANFprojetar0x60Print REG_A to consoleSTDOUT / PRINTencerrar0xFFHalt CPU executionHALT / EXIT
-(More instructions planned for future versions)
+; =======; ================================================
+; PROTOCOLO DE DUPLICAÇÃO DE MATÉRIA (v1.1 Stable)
+; Autor: jonas.architect
+; Objetivo: Teste de Stress da CPU Virtual
+; ================================================
+
+captar           ; [0x50] Aguarda input do sensor (Reg A)
+duplicar         ; [0x11] Copia Reg A para Reg B
+fundir           ; [0x20] Soma (A + B) -> Dobra o valor
+projetar         ; [0x60] Exibe o resultado holográfico
+encerrar         ; [0xFF] Desliga o ciclo (Agora corrigido!)
+
 🔮 Roadmap
 
- Core Kernel & VFS
- Virtual CPU
- WebSocket-based WebCLI
- Multi-threading / concurrent processes
- Graphical mode (Canvas API integration)
- Network stack (P2P encrypted chat)
- Better error reporting & debugging tools
+ -Core Kernel & VFS
+ -Virtual CPU
+ -WebSocket-based WebCLI
+ -Multi-threading / concurrent processes
+ -Graphical mode (Canvas API integration)
+ -Network stack (P2P encrypted chat)
+ -Better error reporting & debugging tools
 
 👨‍💻 Author
 Jonas Guinami
-Architect & AI Researcher
+-Architect & AI Researcher
 GitHub: @jonasguinami
 Feel free to open issues, fork it, or just play around in the terminal.
 Any feedback is super welcome! 🚀
