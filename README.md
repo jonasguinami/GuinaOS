@@ -70,8 +70,8 @@ Open index.html directly (if you prefer static serving)
 GuinaOS executes Ghinamys programs (.ghina source → .es encrypted binary).
 Typical Workflow
 
-Bash# 1. Write your program
-#    examples/protocolo.ghina
+# 1. Bash/ Write your program
+examples/protocolo.ghina
 
 # 2. Compile to encrypted binary
 python CompilerGhina.py protocolo.ghina
