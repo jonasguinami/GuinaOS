@@ -19,20 +19,19 @@ GuinaOS is an educational/experimental project that simulates a complete (but mi
 
 ## 🏗️ Architecture
 
-4-layer isolation model:
+The system uses a strict 4-layer isolation model:
 
 ```mermaid
 graph TD
-    User([User Browser]) -- WebSocket --- Server[Layer 4: Web Bridge<br>FastAPI + WebSockets]
-    Server --- Kernel[Layer 3: Kernel Shell<br>Command interpreter]
-    Kernel --- CPU[Layer 2: Virtual CPU<br>Opcode fetch & execute]
-    Kernel --- VFS[Layer 1: Virtual File System<br>Encrypted sectors]
-    CPU --- Security[Layer 0: Crypto Core<br>XOR + shuffled charset]
+    User([User Browser]) -- WebSocket --- Server[Layer 4: Web Bridge (FastAPI + WebSockets)]
+    Server --- Kernel[Layer 3: Kernel Shell (Command interpreter)]
+    Kernel --- CPU[Layer 2: Virtual CPU (Opcode fetch & execute)]
+    Kernel --- VFS[Layer 1: Virtual File System (Encrypted sectors)]
+    CPU --- Security[Layer 0: Crypto Core (XOR + shuffled charset)]
     VFS --- Security
 
     style User fill:#00f3ff,stroke:#333,color:#000
     style Security fill:#bc13fe,stroke:#333,color:#fff
-
 Layer Breakdown
 
 Layer 0 – Security
