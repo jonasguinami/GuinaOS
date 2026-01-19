@@ -39,9 +39,10 @@ graph TD
     C <--> E[Layer 1: Virtual File System (VFS)];
     D <--> F[Layer 0: Security & Crypto Core];
     E <--> F;
-Layer 0 (Security): Handles XOR encryption/decryption using a deterministic seed (2026) and a shuffled 95-character ASCII table.Layer 1 (VFS): Manages the guina_hd_proprietary.json disk, handling sector creation (directories) and binary storage.Layer 2 (CPU): The logic brain. Reads encrypted bytes, decrypts opcodes on-the-fly, and executes instructions.Layer 3 (Kernel): The command interpreter (import, executar, sonar).Layer 4 (Interface): The FastAPI adapter that streams stdout to the HTML frontend.🛠️ Installation & UsagePrerequisitesPython 3.8+pip1. Clone & InstallBashgit clone [https://github.com/jonasguinami/GuinaOS.git](https://github.com/jonasguinami/GuinaOS.git)
+Layer 0 (Security): Handles XOR encryption/decryption using a deterministic seed (2026) and a shuffled 95-character ASCII table. Layer 1 (VFS): Manages the guina_hd_proprietary.json disk, handling sector creation (directories) and binary storage.Layer 2 (CPU): The logic brain. Reads encrypted bytes, decrypts opcodes on-the-fly, and executes instructions.Layer 3 (Kernel): The command interpreter (import, executar, sonar).Layer 4 (Interface): The FastAPI adapter that streams stdout to the HTML frontend.🛠️ Installation & UsagePrerequisitesPython 3.8+pip1. Clone & InstallBashgit clone [https://github.com/jonasguinami/GuinaOS.git](https://github.com/jonasguinami/GuinaOS.git)
 cd GuinaOS
 pip install fastapi uvicorn
+
 2. Run the SystemStart the WebSocket Server:Bashpython -m uvicorn server:app --reload
 Open index.html in your browser or navigate to http://localhost:8000.💻 The "Ghinamys" LanguageGuinaOS cannot run Python or C. It runs Ghinamys, a language designed for this VM.WorkflowWrite Code: Create a .ghina file (e.g., logic.ghina).Compile: Use the compiler to generate an encrypted binary (.es).Bashpython CompilerGhina_v4.py logic.ghina
 Import: In the Web Terminal, import the binary from the host.Bashjonas.architect:~ $ importar binario_seguro.es
