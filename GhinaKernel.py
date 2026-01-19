@@ -4,6 +4,7 @@ import sys
 import string
 import random
 import time
+import psutil
 
 # ==========================================
 # CAMADA 0: CRIPTOGRAFIA (SEED 2026)
@@ -42,6 +43,7 @@ class GuinaSecurity:
 # ==========================================
 # CAMADA 1: VFS (SISTEMA DE ARQUIVOS)
 # ==========================================
+
 class GuinaVFS:
     def __init__(self, sec):
         self.disk_file = "guina_hd_proprietary.json"
@@ -79,15 +81,33 @@ class GuinaVFS:
         alvo = self._get_alvo()
         if nome in alvo and alvo[nome]["tipo"] == "setor":
             self.current_path.append(nome)
-        else: print("[ERRO] setor inválido.")
+        else: print(f"[ERRO] '{nome}' não é um setor válido.")
+
+    def pulverizar(self, nome):
+        alvo = self._get_alvo()
+        if nome in alvo:
+            del alvo[nome]
+            self.sync()
+            print(f"[DESTRUIÇÃO] '{nome}' foi pulverizado.")
+        else: print(f"[ERRO] alvo '{nome}' não encontrado.")
 
     def gravar(self, nome, conteudo):
         if not nome.endswith(".es"): return "[ERRO] use .es"
+        # Grava como BINARIO (Texto criptografado)
         self._get_alvo()[nome] = {"tipo": "binario", "conteudo": self.sec.encriptar_texto(conteudo)}
         self.sync()
         return f"[MEMORIA] '{nome}' gravado."
 
-    # Gravar Binário Puro (Vindo do Compilador)
+    def extrair(self, nome):
+        # O MÉTODO QUE ESTAVA FALTANDO!
+        alvo = self._get_alvo()
+        if nome in alvo:
+            if alvo[nome]["tipo"] == "binario":
+                return self.sec.decriptar_texto(alvo[nome]["conteudo"])
+            else:
+                return "[ERRO] este arquivo é um executável ou setor, não pode ser extraído como texto."
+        return "[ERRO] arquivo não encontrado."
+
     def importar_binario(self, nome, lista_bytes):
         self._get_alvo()[nome] = {"tipo": "executavel", "conteudo": lista_bytes}
         self.sync()
@@ -164,6 +184,7 @@ class GuinaCPU:
 # ==========================================
 # CAMADA 3: KERNEL (SHELL)
 # ==========================================
+
 class GuinaKernel:
     def __init__(self):
         self.sec = GuinaSecurity()
@@ -176,78 +197,110 @@ class GuinaKernel:
         acao = partes[0].lower()
         param = partes[1] if len(partes) > 1 else None
 
+        # --- SISTEMA E AJUDA ---
         if acao == "help":
-            # Formatação limpa para o terminal
-            print("\n=== GUINA PROTOCOL v3.1 (MANUAL) ===")
-            print(" moldar [nome]      :: Cria setor (pasta)")
-            print(" orbitar [nome]     :: Entra no setor")
-            print(" orbitar voltar     :: Retorna um nível")
-            print(" sonar              :: Escaneia setor atual")
-            print(" gravar [nome.es]   :: Cria arquivo de texto seguro")
-            print(" extrair [nome.es]  :: Lê arquivo de texto")
-            print(" importar [arq.es]  :: Importa binário do Host")
-            print(" executar [arq.es]  :: Processa binário na CPU")
-            print(" pulverizar [alvo]  :: Deleta setor/arquivo")
-            print(" computar           :: Inicia módulo matemático")
-            print(" limpeza            :: Limpa o terminal")
-            print(" derrubar           :: Desliga o sistema")
-            print("========================================")
-
-        elif acao == "sonar": self.vfs.sonar()
-        
-        elif acao == "moldar": 
-            if param: 
-                msg = self.vfs.moldar(param)
-                if msg: print(msg)
-            else: print("[ERRO] nome do setor ausente.")
-
-        elif acao == "importar":
-            if param and os.path.exists(param):
-                try:
-                    with open(param, 'r') as f:
-                        dados = json.load(f)
-                    self.vfs.importar_binario(param, dados)
-                    print(f"[IO] binário '{param}' importado com sucesso.")
-                except:
-                    print("[ERRO] falha ao ler binário do host.")
-            else:
-                print("[ERRO] arquivo não encontrado no pc host.")
-
-        elif acao == "executar":
-            if param:
-                bytecode = self.vfs.ler_binario(param)
-                if bytecode:
-                    self.cpu.executar(bytecode)
-                else:
-                    print("[ERRO] arquivo não é executável ou não existe.")
-            else: print("[ERRO] qual arquivo?")
-
-        # Comandos simples de deleção e navegação
-        elif acao == "orbitar":
-            if param: self.vfs.orbitar(param)
-        
-        elif acao == "pulverizar":
-            if param: self.vfs.pulverizar(param)
-
-        elif acao == "gravar":
-            if param:
-                print(f"[INPUT] Texto para '{param}':")
-                conteudo = input("    > ")
-                self.vfs.gravar(param, conteudo)
-
-        elif acao == "extrair":
-            if param:
-                txt = self.vfs.extrair(param)
-                if txt: print(f"\n>> CONTEÚDO: {txt}")
+            print("\n=== GUINA PROTOCOL v3.3 (OFFICIAL MANUAL) ===")
+            print(" [ESTRUTURA] ")
+            print("  moldar [nome]      :: Cria setor (pasta)")
+            print("  orbitar [nome]     :: Entra no setor (use 'voltar' para subir)")
+            print("  sonar              :: Escaneia o setor atual")
+            print("  pulverizar [alvo]  :: Deleta permanentemente o alvo")
+            print("")
+            print(" [DADOS & ARQUIVOS] ")
+            print("  gravar [nome.es]   :: Inicia fluxo de escrita (envie o texto após o comando)")
+            print("  extrair [nome.es]  :: Decripta e lê conteúdo de texto")
+            print("  importar [arq.es]  :: Traz binário do Host para o VFS")
+            print("  executar [arq.es]  :: Roda binário na CPU Virtual")
+            print("")
+            print(" [SISTEMA & UTILITÁRIOS] ")
+            print("  computar           :: Ativa Math Core (digite 'fim' para sair)")
+            print("  status             :: Monitora CPU/RAM real do Host")
+            print("  limpeza            :: Limpa o buffer do terminal")
+            print("  derrubar           :: Encerra o Kernel")
+            print("==============================================")
 
         elif acao == "limpeza":
-             os.system('cls' if os.name == 'nt' else 'clear')
-             
+            os.system('cls' if os.name == 'nt' else 'clear')
+
         elif acao == "derrubar":
             print("[SHUTDOWN] Desconectando...")
             sys.exit()
 
-        else: print("[ERRO] comando desconhecido.")
+        if acao == "status":
+            cpu_uso = psutil.cpu_percent(interval=0.1)
+            ram = psutil.virtual_memory()
+            disco = psutil.disk_usage('/')
+            
+            print("\n=== MONITORAMENTO DE HARDWARE (HOST) ===")
+            print(f" CPU CORE      :: [{cpu_uso}%] " + ("█" * int(cpu_uso/10)))
+            print(f" MEMÓRIA RAM   :: {ram.percent}% ({ram.used // 1024**2}MB / {ram.total // 1024**2}MB)")
+            print(f" DISCO VFS     :: {disco.percent}% ocupado")
+            print(f" STATUS NÚCLEO :: OPERACIONAL (ESTÁVEL)")
+            print("========================================\n")
+
+        # --- MANUTENÇÃO DO EXTRAIR (O QUE ESTAVA DANDO ERRO) ---
+        elif acao == "extrair":
+            if param:
+                txt = self.vfs.extrair(param)
+                if txt: 
+                    # Se for erro, o VFS retorna uma string começando com [ERRO]
+                    print(f"\n>> CONTEÚDO EXTRAÍDO:\n{txt}\n")
+            else: 
+                print("[ERRO] informe o nome do arquivo para extração.")
+
+        # --- NAVEGAÇÃO E EXPLORAÇÃO ---
+        elif acao == "sonar": 
+            self.vfs.sonar()
+
+        elif acao == "moldar": 
+            if param: print(self.vfs.moldar(param))
+            else: print("[ERRO] nome do setor ausente.")
+
+        elif acao == "orbitar":
+            if param: self.vfs.orbitar(param)
+            else: print("[ERRO] setor alvo necessário.")
+
+        # --- MANIPULAÇÃO DE DADOS (CORRIGIDO) ---
+        elif acao == "gravar":
+            # Agora apenas avisa (o server.py cuida do resto)
+            if param:
+                pass # O servidor intercepta e faz a mágica
+            else: 
+                print("[ERRO] informe o nome do arquivo.")
+
+        elif acao == "extrair":
+            if param:
+                txt = self.vfs.extrair(param)
+                if txt: print(f"\n>> CONTEÚDO EXTRAÍDO:\n{txt}")
+            else: 
+                print("[ERRO] qual arquivo deseja extrair?")
+
+        elif acao == "pulverizar":
+            if param: self.vfs.pulverizar(param)
+            else: print("[ERRO] o que você deseja pulverizar?")
+
+        # --- EXECUÇÃO E BINÁRIOS ---
+        elif acao == "importar":
+            if param and os.path.exists(param):
+                with open(param, 'r') as f:
+                    dados = json.load(f)
+                self.vfs.importar_binario(param, dados)
+                print(f"[IO] binário '{param}' importado.")
+            else: print("[ERRO] arquivo host não encontrado.")
+
+        elif acao == "executar":
+            if param:
+                bytecode = self.vfs.ler_binario(param)
+                if bytecode: self.cpu.executar(bytecode)
+                else: print("[ERRO] executável não encontrado.")
+            else: print("[ERRO] qual arquivo?")
+
+        elif acao == "computar":
+            # O servidor intercepta esse comando e entra no modo matemático
+            print("[SISTEMA] Alternando para modo de processamento matemático...")
+
+        else: 
+            print(f"[ERRO] comando '{acao}' desconhecido. digite 'help'.")
 
 # Permite rodar o Kernel sozinho sem o WebServer se quiser testar rápido
 if __name__ == "__main__":

@@ -38,20 +38,59 @@ class WebKernel(GuinaKernel):
 # Instância global do Kernel
 sistema = WebKernel()
 
+# No server.py, altere o loop principal:
+
+estado = {"escrita": False, "arquivo": "", "math": False}
+
 @app.websocket("/neuro-link")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
-    await websocket.send_text("Conexão Neural Estabelecida...\nBem-vindo ao GuinaOS v2.0 (Web Edition)")
+    await websocket.send_text(">>> NEURO-LINK: ESTABELECIDO")
     
     while True:
         try:
-            # Espera o comando do Front-end
             data = await websocket.receive_text()
+            cmd = data.strip()
+
+            # MODO ESCRITA (GRAVAR)
+            if estado["escrita"]:
+                sistema.vfs.gravar(estado["arquivo"], cmd)
+                estado["escrita"] = False
+                await websocket.send_text(f"[MEMORIA] Dados inscritos em '{estado['arquivo']}'.")
+                continue
+
+            # MODO MATEMÁTICO (COMPUTAR)
+            if estado["math"]:
+                if cmd.lower() == "fim":
+                    estado["math"] = False
+                    await websocket.send_text("[MATH] Módulo encerrado.")
+                else:
+                    try:
+                        # O eval() faz a conta
+                        resultado = eval(cmd)
+                        await websocket.send_text(f"   = {resultado}")
+                    except:
+                        await websocket.send_text("   [ERRO] Cálculo inválido.")
+                continue
+
+            # ATIVAÇÃO DE MODOS
+            if cmd.startswith("gravar "):
+                estado["escrita"] = True
+                estado["arquivo"] = cmd.split(" ", 1)[1]
+                await websocket.send_text(f"[KERNEL] Aguardando dados para '{estado['arquivo']}'...")
+                continue
             
-            # Processa no Python
-            resposta = sistema.processar_comando_web(data)
-            
-            # Devolve a resposta pro Front-end
-            await websocket.send_text(resposta)
-        except:
+            if cmd == "computar":
+                estado["math"] = True
+                await websocket.send_text("[MATH CORE] Iniciado. Digite a conta ou 'fim' para sair.")
+                continue
+
+            # COMANDOS NORMAIS (CAPTURA STDOUT)
+            capture = io.StringIO()
+            sys.stdout = capture
+            sistema.interpretar(cmd)
+            sys.stdout = sys.__stdout__
+            await websocket.send_text(capture.getvalue() or f"Comando '{cmd}' executado.")
+
+        except Exception as e:
             break
