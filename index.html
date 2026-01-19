@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Jonas.Architect | Neural Terminal</title>
+    <style>
+    /* Reset Global de Engenharia */
+    * {
+        box-sizing: border-box;
+        outline: none;
+    }
+
+    :root {
+        --bg-color: #050510;
+        --glass: rgba(20, 20, 35, 0.75); /* Um pouco mais escuro para leitura */
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --neon-blue: #00f3ff;
+        --neon-purple: #bc13fe;
+        --text-color: #e0e0e0;
+        --font-stack: 'Courier New', Courier, monospace;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        background-color: var(--bg-color);
+        /* Background Cyberpunk Sutil */
+        background-image: 
+            radial-gradient(circle at 15% 50%, rgba(188, 19, 254, 0.15) 0%, transparent 25%),
+            radial-gradient(circle at 85% 30%, rgba(0, 243, 255, 0.15) 0%, transparent 25%);
+        color: var(--text-color);
+        font-family: var(--font-stack);
+        /* Usar dvh (Dynamic Viewport Height) para mobile */
+        height: 100dvh; 
+        width: 100vw;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden; /* Impede scroll na página inteira */
+    }
+
+    /* O Container "Vidro" */
+    .terminal-window {
+        width: 85%;
+        max-width: 1200px; /* Limite para telas ultrawide */
+        height: 85%;
+        background: var(--glass);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+        
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    /* Barra de Título */
+    .header {
+        background: rgba(255, 255, 255, 0.03);
+        height: 45px;
+        padding: 0 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--glass-border);
+        flex-shrink: 0; /* Impede que o header encolha */
+    }
+
+    .dots {
+        display: flex;
+        gap: 8px;
+    }
+
+    .dots span {
+        display: block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+    }
+    .red { background: #ff5f56; box-shadow: 0 0 5px #ff5f56; }
+    .yellow { background: #ffbd2e; box-shadow: 0 0 5px #ffbd2e; }
+    .green { background: #27c93f; box-shadow: 0 0 5px #27c93f; }
+
+    .title {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.6);
+        letter-spacing: 2px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    /* Área de Output (Onde o texto aparece) */
+    #output {
+        flex: 1; /* Ocupa todo o espaço restante */
+        padding: 20px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        font-size: 1rem;
+        line-height: 1.6;
+        text-shadow: 0 0 4px rgba(0, 243, 255, 0.15);
+        
+        /* Scrollbar suave */
+        scroll-behavior: smooth;
+    }
+
+    /* Estilos de Texto */
+    .system-msg { color: var(--neon-purple); font-weight: bold; }
+    .user-cmd { color: var(--neon-blue); font-weight: bold; margin-top: 5px; display: block; }
+    .response { color: var(--text-color); margin-bottom: 5px; }
+
+    /* Área de Input (Rodapé fixo) */
+    .input-line {
+        display: flex;
+        align-items: center; /* CENTRALIZA VERTICALMENTE O TEXTO */
+        padding: 15px 20px;
+        background: rgba(0, 0, 0, 0.4);
+        border-top: 1px solid var(--glass-border);
+        min-height: 60px; /* Altura mínima para toque no mobile */
+    }
+
+    .prompt {
+        color: var(--neon-blue);
+        margin-right: 12px;
+        font-weight: bold;
+        white-space: nowrap; /* Impede que o prompt quebre linha */
+    }
+
+    input {
+        background: transparent;
+        border: none;
+        color: white;
+        font-family: var(--font-stack);
+        font-size: 1rem;
+        flex: 1; /* Ocupa o resto da linha */
+        height: 100%;
+        padding: 0;
+    }
+
+    /* Custom Scrollbar (Estilo Hacker) */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.4); }
+
+    /* =========================================
+       MEDIA QUERIES (MOBILE PERFEITO)
+       ========================================= */
+    @media (max-width: 768px) {
+        body {
+            align-items: flex-end; /* No mobile, empurra pro fundo por causa do teclado */
+        }
+
+        .terminal-window {
+            width: 100%;
+            height: 100%; /* Ocupa tela cheia */
+            border-radius: 0; /* Remove bordas arredondadas */
+            border: none;
+            box-shadow: none;
+        }
+
+        .header {
+            padding: 0 15px;
+        }
+
+        .title {
+            font-size: 0.75rem; /* Título menor */
+        }
+
+        #output {
+            font-size: 0.95rem; /* Texto levemente menor */
+            padding: 15px;
+        }
+
+        .input-line {
+            padding: 10px 15px;
+            min-height: 50px;
+        }
+
+        .prompt {
+            font-size: 0.9rem;
+            margin-right: 8px;
+        }
+
+        input {
+            font-size: 1rem; /* Mantém 16px para evitar zoom do iPhone no input */
+        }
+    }
+</style>
+</head>
+<body>
+
+    <div class="terminal-window">
+        <div class="header">
+            <div class="dots">
+                <span class="red"></span><span class="yellow"></span><span class="green"></span>
+            </div>
+            <div class="title">GUINA.OS // ARCHITECT_EDITION</div>
+            <div style="width: 50px;"></div>
+        </div>
+        
+        <div id="output"></div>
+        
+        <div class="input-line">
+            <span class="prompt">jonas.architect:~ $</span>
+            <input type="text" id="cmdInput" autofocus autocomplete="off">
+        </div>
+    </div>
+
+    <script>
+        const outputDiv = document.getElementById('output');
+        const inputField = document.getElementById('cmdInput');
+        
+        // Conecta ao Python via WebSocket
+        const socket = new WebSocket("ws://127.0.0.1:8000/neuro-link");
+
+        socket.onopen = function(e) {
+            printLine(">>> NEURO-LINK: ESTABELECIDO", "system-msg");
+        };
+
+        socket.onmessage = function(event) {
+            // Recebe resposta do Python e imprime
+            printLine(event.data, "response");
+            scrollToBottom();
+        };
+
+        socket.onclose = function(event) {
+            printLine(">>> CONEXÃO PERDIDA", "red");
+        };
+
+        inputField.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                const cmd = inputField.value;
+                if (cmd.trim() !== "") {
+                    // 1. Mostra o que você digitou
+                    printLine(`jonas.architect:~ $ ${cmd}`, "user-cmd");
+                    
+                    // 2. Limpa o input
+                    inputField.value = "";
+
+                    // 3. Manda pro Python
+                    if (cmd.toLowerCase() === "limpeza") {
+                        outputDiv.innerHTML = ""; // Limpa no front
+                    } else {
+                        socket.send(cmd);
+                    }
+                }
+            }
+        });
+
+        function printLine(text, className) {
+            const line = document.createElement('div');
+            line.className = className || "";
+            line.textContent = text;
+            outputDiv.appendChild(line);
+        }
+
+        function scrollToBottom() {
+            outputDiv.scrollTop = outputDiv.scrollHeight;
+        }
+    </script>
+</body>
+</html>
