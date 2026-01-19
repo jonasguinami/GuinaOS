@@ -31,14 +31,17 @@ Unlike standard terminals, GuinaOS operates on **Encrypted Bytecode**. Programs 
 
 The system is built on a 4-Layer Architecture:
 
-```mermaid
 graph TD
-    A[User (Browser)] <-->|WebSocket| B[Layer 4: Web Bridge (Server.py)];
-    B <--> C[Layer 3: Kernel Shell];
-    C <--> D[Layer 2: Virtual CPU];
-    C <--> E[Layer 1: Virtual File System (VFS)];
-    D <--> F[Layer 0: Security & Crypto Core];
-    E <--> F;
+    User([User Browser]) -- WebSocket --- Server[Layer 4: Web Bridge]
+    Server --- Kernel[Layer 3: Kernel Shell]
+    Kernel --- CPU[Layer 2: Virtual CPU]
+    Kernel --- VFS[Layer 1: Virtual File System]
+    CPU --- Security[Layer 0: Crypto Core]
+    VFS --- Security
+    
+    style User fill:#00f3ff,stroke:#333,color:#000
+    style Security fill:#bc13fe,stroke:#333,color:#fff
+
 Layer 0 (Security): Handles XOR encryption/decryption using a deterministic seed (2026) and a shuffled 95-character ASCII table. Layer 1 (VFS): Manages the guina_hd_proprietary.json disk, handling sector creation (directories) and binary storage.Layer 2 (CPU): The logic brain. Reads encrypted bytes, decrypts opcodes on-the-fly, and executes instructions.Layer 3 (Kernel): The command interpreter (import, executar, sonar).Layer 4 (Interface): The FastAPI adapter that streams stdout to the HTML frontend.🛠️ Installation & UsagePrerequisitesPython 3.8+pip1. Clone & InstallBashgit clone [https://github.com/jonasguinami/GuinaOS.git](https://github.com/jonasguinami/GuinaOS.git)
 cd GuinaOS
 pip install fastapi uvicorn
