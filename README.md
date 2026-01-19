@@ -11,10 +11,15 @@ GuinaOS is an educational/experimental project that simulates a complete (but mi
 ## ✨ Features
 
 - Custom 8-bit-ish ISA with poetic mnemonics (materializar, duplicar, fundir, etc.)
+
 - Deterministic XOR-based encryption using a fixed seed (2026) + shuffled ASCII table
+
 - In-memory encrypted "hard disk" (guina_hd_proprietary.json)
+
 - Web-based terminal with real-time command execution
+
 - FastAPI + WebSockets backend
+
 - No external dependencies beyond Python standard libs + FastAPI/uvicorn
 
 ## 🏗️ Architecture
@@ -48,11 +53,13 @@ pip
 Steps
 
 Clone the repositoryBashgit clone https://github.com/jonasguinami/GuinaOS.git
-cd GuinaOS
+/cd GuinaOS
 
-Install dependenciesBashpip install fastapi uvicorn
+Install dependencies
+Bash/ pip install fastapi uvicorn
 
-Start the serverBashpython -m uvicorn server:app --reload
+Start the server
+Bash/ python -m uvicorn server:app --reload
 
 Open in browser http://localhost:8000
 or
@@ -62,6 +69,7 @@ Open index.html directly (if you prefer static serving)
 💻 Ghinamys – The Proprietary Language
 GuinaOS executes Ghinamys programs (.ghina source → .es encrypted binary).
 Typical Workflow
+
 Bash# 1. Write your program
 #    examples/protocolo.ghina
 
@@ -79,7 +87,9 @@ python CompilerGhina.py protocolo.ghina
  -Better error reporting & debugging tools
 
 👨‍💻 Author
+
 Jonas Guinami
+
 -Architect & AI Researcher
 GitHub: @jonasguinami
 Feel free to open issues, fork it, or just play around in the terminal.
