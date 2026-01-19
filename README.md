@@ -49,10 +49,12 @@ Steps
 
 Clone the repositoryBashgit clone https://github.com/jonasguinami/GuinaOS.git
 cd GuinaOS
+
 Install dependenciesBashpip install fastapi uvicorn
+
 Start the serverBashpython -m uvicorn server:app --reload
-Open in browser
-http://localhost:8000
+
+Open in browser http://localhost:8000
 or
 Open index.html directly (if you prefer static serving)
 
@@ -61,27 +63,10 @@ Open index.html directly (if you prefer static serving)
 GuinaOS executes Ghinamys programs (.ghina source → .es encrypted binary).
 Typical Workflow
 Bash# 1. Write your program
-#    examples/logic.ghina
+#    examples/protocolo.ghina
 
 # 2. Compile to encrypted binary
-python CompilerGhina_v4.py logic.ghina
-
-# 3. Use the WebCLI:
-jonas.architect:~ $ importar binario_seguro.es
-jonas.architect:~ $ executar binario_seguro.es
-Instruction Set (v1.1 – Stable)
-
-; =======; ================================================
-; PROTOCOLO DE DUPLICAÇÃO DE MATÉRIA (v1.1 Stable)
-; Autor: jonas.architect
-; Objetivo: Teste de Stress da CPU Virtual
-; ================================================
-
-captar           ; [0x50] Aguarda input do sensor (Reg A)
-duplicar         ; [0x11] Copia Reg A para Reg B
-fundir           ; [0x20] Soma (A + B) -> Dobra o valor
-projetar         ; [0x60] Exibe o resultado holográfico
-encerrar         ; [0xFF] Desliga o ciclo (Agora corrigido!)
+python CompilerGhina.py protocolo.ghina
 
 🔮 Roadmap
 
