@@ -2,834 +2,264 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RareFast World</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+    <title>Jonas.Architect | Neural Terminal</title>
+    <style>
+    /* Reset Global de Engenharia */
+    * {
+        box-sizing: border-box;
+        outline: none;
+    }
+
+    :root {
+        --bg-color: #050510;
+        --glass: rgba(20, 20, 35, 0.75); /* Um pouco mais escuro para leitura */
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --neon-blue: #00f3ff;
+        --neon-purple: #bc13fe;
+        --text-color: #e0e0e0;
+        --font-stack: 'Courier New', Courier, monospace;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        background-color: var(--bg-color);
+        /* Background Cyberpunk Sutil */
+        background-image: 
+            radial-gradient(circle at 15% 50%, rgba(188, 19, 254, 0.15) 0%, transparent 25%),
+            radial-gradient(circle at 85% 30%, rgba(0, 243, 255, 0.15) 0%, transparent 25%);
+        color: var(--text-color);
+        font-family: var(--font-stack);
+        /* Usar dvh (Dynamic Viewport Height) para mobile */
+        height: 100dvh; 
+        width: 100vw;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden; /* Impede scroll na página inteira */
+    }
+
+    /* O Container "Vidro" */
+    .terminal-window {
+        width: 85%;
+        max-width: 1200px; /* Limite para telas ultrawide */
+        height: 85%;
+        background: var(--glass);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+        
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    /* Barra de Título */
+    .header {
+        background: rgba(255, 255, 255, 0.03);
+        height: 45px;
+        padding: 0 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--glass-border);
+        flex-shrink: 0; /* Impede que o header encolha */
+    }
+
+    .dots {
+        display: flex;
+        gap: 8px;
+    }
+
+    .dots span {
+        display: block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+    }
+    .red { background: #ff5f56; box-shadow: 0 0 5px #ff5f56; }
+    .yellow { background: #ffbd2e; box-shadow: 0 0 5px #ffbd2e; }
+    .green { background: #27c93f; box-shadow: 0 0 5px #27c93f; }
+
+    .title {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.6);
+        letter-spacing: 2px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    /* Área de Output (Onde o texto aparece) */
+    #output {
+        flex: 1; /* Ocupa todo o espaço restante */
+        padding: 20px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        font-size: 1rem;
+        line-height: 1.6;
+        text-shadow: 0 0 4px rgba(0, 243, 255, 0.15);
+        
+        /* Scrollbar suave */
+        scroll-behavior: smooth;
+    }
+
+    /* Estilos de Texto */
+    .system-msg { color: var(--neon-purple); font-weight: bold; }
+    .user-cmd { color: var(--neon-blue); font-weight: bold; margin-top: 5px; display: block; }
+    .response { color: var(--text-color); margin-bottom: 5px; }
+
+    /* Área de Input (Rodapé fixo) */
+    .input-line {
+        display: flex;
+        align-items: center; /* CENTRALIZA VERTICALMENTE O TEXTO */
+        padding: 15px 20px;
+        background: rgba(0, 0, 0, 0.4);
+        border-top: 1px solid var(--glass-border);
+        min-height: 60px; /* Altura mínima para toque no mobile */
+    }
+
+    .prompt {
+        color: var(--neon-blue);
+        margin-right: 12px;
+        font-weight: bold;
+        white-space: nowrap; /* Impede que o prompt quebre linha */
+    }
+
+    input {
+        background: transparent;
+        border: none;
+        color: white;
+        font-family: var(--font-stack);
+        font-size: 1rem;
+        flex: 1; /* Ocupa o resto da linha */
+        height: 100%;
+        padding: 0;
+    }
+
+    /* Custom Scrollbar (Estilo Hacker) */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.4); }
+
+    /* =========================================
+       MEDIA QUERIES (MOBILE PERFEITO)
+       ========================================= */
+    @media (max-width: 768px) {
+        body {
+            align-items: flex-end; /* No mobile, empurra pro fundo por causa do teclado */
+        }
+
+        .terminal-window {
+            width: 100%;
+            height: 100%; /* Ocupa tela cheia */
+            border-radius: 0; /* Remove bordas arredondadas */
+            border: none;
+            box-shadow: none;
+        }
+
+        .header {
+            padding: 0 15px;
+        }
+
+        .title {
+            font-size: 0.75rem; /* Título menor */
+        }
+
+        #output {
+            font-size: 0.95rem; /* Texto levemente menor */
+            padding: 15px;
+        }
+
+        .input-line {
+            padding: 10px 15px;
+            min-height: 50px;
+        }
+
+        .prompt {
+            font-size: 0.9rem;
+            margin-right: 8px;
+        }
+
+        input {
+            font-size: 1rem; /* Mantém 16px para evitar zoom do iPhone no input */
+        }
+    }
+</style>
 </head>
 <body>
 
-    <header>
-        <div class="main-header">
-            <div class="logo">
-                <h1><span style="color: var(--neon-blue)">Rare</span>Fast<span class="highlight" data-text="World">World</span><span style="color: var(--neon-pink);">_</span></h1>
-            </div>
-            <nav class="navbar">
-                <ul>
-                    <li><a href="#dados">/dados</a></li>
-                    <li><a href="#sobre">/terminal</a></li>
-                    <li><button id="btnLogin" class="btn-terminal">login()</button></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
-
-    <main>
-        
-        <section class="hero">
-            <div class="console-text" data-text="> Conexão segura estabelecida..."></div>
-            
-            <h2>Bem-vindo ao meu<br><span class="highlight" data-text="Fragmento">Fragmento</span></br></h2>
-            <p class="subtitle">Olá! Se está neste lugar, provavelmente já me conhece. Aqui você encontra estudos, projetos, teorias e caos rearranjado.</p>
-        </section>
-
-<div class="rf-search-container">
-    <div class="rf-search-glitch"></div>
-    
-    <svg class="rf-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="8"></circle>
-        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-    </svg>
-
-    <input type="text" id="rfSearchInput" class="rf-input-field" 
-           placeholder=">> acessar_banco_de_dados..." 
-           onkeyup="handleSearch(this.value)" 
-           autocomplete="off">
-
-    <button id="rfClearBtn" class="rf-clear-btn" onclick="clearSearch()" style="display: none;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-    </button>
-</div>
-        
-        
-        <section id="dados" class="content-section">
-            
-            <div class="filter-container">
-                <button class="filter-btn active" onclick="filterPosts('all')">/todos</button>
-                <button class="filter-btn" onclick="filterPosts('Estudos')">/estudos</button>
-                <button class="filter-btn" onclick="filterPosts('Teorias')">/teorias</button>
-                <button class="filter-btn" onclick="filterPosts('Projetos')">/projetos</button>
-                <button class="filter-btn" onclick="filterPosts('Livros')">/livros</button>
-            </div>
-
-            <div class="grid-container" id="posts-container">
-
-                <article class="card" data-category="Projetos">
-    <span class="tag">Projetos</span>
-    <h4>GuinaOS: O Manifesto da Autonomia Tecnológica</h4>
-    <p>Construindo um ecossistema impenetrável do zero. Por que criar seu próprio SO é o último refúgio contra a censura corporativa e o caos sistêmico.</p>
-    
-    <div class="full-content" style="display: none;">
-        <h3>// Desconstruindo o Monopólio</h3>
-        <p>Vivemos em uma era onde grandes corporações ditam o que você pode executar no seu próprio hardware. O <strong>GuinaOS</strong> nasceu da necessidade de quebrar essas correntes. É um Sistema Operacional conceitual com arquitetura Von Neumann própria, rodando inteiramente sob minha lógica.</p>
-
-        <div class="tech-stack">
-            <strong>Stack de Soberania:</strong> 
-            <code>Pure Python Kernel</code> | 
-            <code>Ghinamys (Custom ISA)</code> | 
-            <code>VFS Encrypted</code> | 
-            <code>FastAPI Bridge</code>
-        </div>
-
-        <h3>1. A Linguagem Ghinamys e a CPU Virtual</h3>
-        <p>Para garantir a segurança, o GuinaOS não executa binários comuns. Ele utiliza a <strong>Ghinamys</strong>, uma linguagem de máquina proprietária que traduz instruções para opcodes que só o meu Kernel entende (ex: <em>materializar</em>, <em>fundir</em>, <em>sonar</em>).</p>
-        <ul>
-            <li><strong>Isolamento Total:</strong> Se um atacante não possui o dicionário de instrução e a seed de criptografia, o código é ruído puro.</li>
-            <li><strong>Processamento Criptográfico:</strong> Cada ciclo da CPU é decriptado <em>on-the-fly</em> através de um XOR determinístico com Seed 2026.</li>
-        </ul>
-
-        <h3>2. Autonomia vs. Censura</h3>
-        <p>A "autonomia tecnológica" é o futuro. Quando você depende de nuvens públicas e SOs fechados (Windows/Apple), você aceita termos de serviço que podem silenciar sua voz ou apagar seus dados. 
-        O GuinaOS propõe:</p>
-        <ul>
-            <li><strong>VFS (Virtual File System):</strong> Arquivos gravados em setores simulados, invisíveis ao sistema hospedeiro.</li>
-            <li><strong>Imunidade a Backdoors:</strong> Sem bibliotecas de terceiros vulneráveis, sem telemetria oculta.</li>
-        </ul>
-
-        <h3>// Por que o futuro é IA vs IA e Autodefesa?</h3>
-        <p>O GuinaOS foi desenhado para ser o solo fértil da auto-defesa dinâmica. Em um cenário de caos, o sistema não espera ordens humanas, ele detecta anomalias no fluxo de "Guits" (nossa unidade de processamento) e se fecha preventivamente.</p>
-
-        <blockquote>
-            "Ter o seu próprio sistema não é sobre eficiência, é sobre quem detém a chave mestra da sua realidade digital."
-        </blockquote>
-
-        <div style="margin: 20px 0;">
-            <a href="https://github.com/jonasguinami/GuinaOS" target="_blank" style="text-decoration: none; display: inline-block;">
-                <span style="color: var(--neon-blue); font-family: var(--font-mono); font-weight: bold; border: 1px solid var(--neon-blue); padding: 5px 15px; border-radius: 4px; transition: 0.3s;">
-                    &gt;&gt; ACESSAR_REPOSITORIO (GitHub)
-                </span>
-            </a>
-        </div>
-
-        <p style="margin-top: 20px;">
-            <span style="color: var(--neon-blue); font-family: var(--font-mono);">
-                >> STATUS: SYSTEM_BOOT_SUCCESS // FREEDOM_ENABLED
-            </span>
-        </p>
-    </div>
-
-    <button onclick="openPost(this)" class="read-more btn-terminal">
-        Acessar Kernel <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
-    </button>
-</article>
-
-                <article class="card" data-category="Estudos">
-    <span class="tag">Estudos</span>
-    <h4>IA vs IA: A Guerra do Microssegundo</h4>
-    <p>O fim da defesa passiva. Como implementar sistemas de autodefesa dinâmica que utilizam iscas e polimorfismo para colapsar ataques de IA ofensiva.</p>
-    
-    <div class="full-content" style="display: none;">
-        <h3>// O Campo de Batalha Sintético</h3>
-        <p>Em 2026, o tempo de reação humano tornou-se obsoleto. Quando um worm de IA ofensiva ataca, ele não testa uma porta por vez, ele testa milhares de variantes de exploits em milissegundos. A solução? <strong>A Autodefesa Dinâmica em Tempo Real.</strong></p>
-
-        <h3>1. Arquitetura de Iscas (Honey-Tokens Ativos)</h3>
-        <p>Em vez de apenas fechar as portas, nós espalhamos "iscas" de dados sensíveis pelo sistema. Essas iscas são sensores de telemetria silenciosos. 
-        <ul>
-            <li><strong>O Gatilho:</strong> No momento em que uma IA atacante toca em uma credencial falsa, o sistema não apenas bloqueia o IP, ele reconhece a <em>assinatura de comportamento</em> do ataque, já que estes dados servem justamente pra serem atacados e usados de alerta para a equipe.</li>
-            <li><strong>A Resposta:</strong> O sistema entra em modo de isolamento segmentado, "fingindo" que o ataque deu certo enquanto analisa o rastro do invasor em um ambiente sandbox isolado.</li>
-        </ul>
-
-        <h3>2. Código Polimórfico e Auto-Fechamento</h3>
-        <p>A maior vulnerabilidade de um sistema offline ou fechado é a sua estaticidade. A autodefesa dinâmica propõe que o código mude sua própria superfície de ataque.</p>
-        <ul>
-            <li><strong>Imunidade Biológica:</strong> Se o sistema detecta uma tentativa de quebra de hash, ele pode rotacionar protocolos de comunicação internamente. É o equivalente digital a mudar a fechadura da casa toda vez que alguém tenta forçar a maçaneta.</li>
-            <li><strong>IA de Contenção:</strong> Um modelo local (SLM) monitora os fluxos de memória. Se o padrão de execução divergir do baseline de "racionalidade" do sistema, o kernel se fecha preventivamente.</li>
-        </ul>
-
-        
-
-        <h3>// A Vitória pela Assimetria</h3>
-        <p>O objetivo não é ser invulnerável, mas ser <strong>caro demais para ser invadido</strong>, tornando insustentável o ataque. Ao usar IAs de defesa que operam no metal, criamos uma assimetria: o atacante gasta recursos processando o ataque, enquanto nossa defesa consome energia apenas para "desviar" e se reconstruir.</p>
-
-        <blockquote>
-            "O software do futuro não será uma fortaleza de pedra, mas uma névoa inteligente: impalpável para quem tenta bater, mas letal para quem tenta atravessar."
-        </blockquote>
-
-        <h3>// Roadmap de Implementação</h3>
-        <p>Estamos estudando a integração de modelos <em>TinyML</em> diretamente nos endpoints para garantir que a decisão de "fechar o sistema" ocorra na borda, sem latência e sem necessidade de consulta externa.</p>
-        
-        <p style="margin-top: 20px;">
-            <span style="color: var(--neon-pink); font-family: var(--font-mono); font-weight: bold;">
-                >> PRÓXIMA FASE: Protocolos de Autodestruição de Dados em caso de Breach Físico.
-            </span>
-        </p>
-    </div>
-
-    <button onclick="openPost(this)" class="read-more btn-terminal">
-        Ler arquivo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg>
-    </button>
-</article>
-
-                <article class="card" data-category="Teorias">
-    <span class="tag">Teorias</span>
-    <h4>Arquitetura da Chave Perdida</h4>
-    <p>O paradoxo da segurança absoluta: por que sistemas offline ainda sucumbem ao fator humano e como mitigar a entropia epistêmica.</p>
-    
-    <div class="full-content" style="display: none;">
-        <h3>// O Paradoxo do Cofre de Titânio</h3>
-        <p>Você pode construir a muralha mais alta do mundo e remover todas as escadas (offline), mas se o sentinela dormir ou se o dono perder a chave no caminho, a segurança torna-se uma ilusão. É o que chamo de <strong>Fenômeno da Chave Perdida</strong>.</p>
-        
-        <p>A segurança real não reside no protocolo engessado, mas na dinâmica de conhecimento da equipe. Protocolos são vulneráveis porque são previsíveis, ja a racionalização humana é a única variável capaz de bater de frente com a IA ofensiva.</p>
-
-        <h3>1. A Falha no Rastro (Lateral Movement)</h3>
-        <p>O ladrão raramente arromba a porta da frente (a porta 1 e 2 podem ser perfeitas). Ele observa o rastro deixado pelo protocolo. Se a comunicação entre o sistema "blindado" e o operador humano for vulnerável, o atacante rouba a chave que você nem percebeu que perdeu.</p>
-        <ul>
-            <li><strong>Ação:</strong> O sequestro de dados ocorre antes mesmo do alerta soar. Quando você percebe, ele já está na sua casa, ameaçando o que você mais preza.</li>
-        </ul>
-
-        <h3>2. Racionalização Epistêmica vs. Protocolo</h3>
-        <p>A elite da cyber segurança está migrando do foco em ferramentas para o foco em <strong>consciência situacional</strong>, pois rotocolos engessam o defensor e dão um mapa ao atacante.</p>
-        <ul>
-            <li><strong>Dinâmica de Equipe:</strong> Em vez de regras estáticas, treinamos a percepção de anomalias. Se o time sabe onde caminha e como se precaver, a "chave" torna-se mutável.</li>
-            <li><strong>Soberania Mental:</strong> A verdadeira criptografia começa na mente de quem opera o sistema. É a capacidade de "peitar" o invasor entendendo a lógica dele, não apenas esperando o firewall agir.</li>
-        </ul>
-
-        <blockquote>
-            "O protocolo é uma foto do passado. A dinâmica de conhecimento atualizada é o vídeo em tempo real da defesa como uma câmera de segurança"
-        </blockquote>
-
-        <h3>// Conclusão: A Esperança como Ação</h3>
-        <p>Não basta ser egocêntrico e acreditar que pode bater de frente com o hacking por IA, é preciso transformar essa confiança em <strong>arquitetura resiliente</strong>. Se o sistema for imutável e a equipe tiver clareza epistêmica, o custo para o ladrão usar a "chave perdida" torna-se proibitivo.</p>
-        
-        <p style="margin-top: 20px;">
-            <span style="color: var(--neon-blue); font-family: var(--font-mono);">
-                >> STATUS: Defesa Ativa Implementada.
-            </span>
-        </p>
-    </div>
-
-    <button onclick="openPost(this)" class="read-more btn-terminal">
-        Ler arquivo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg>
-    </button>
-</article>
-
-                <article class="card" data-category="Estudos">
-    <span class="tag">Estudos</span>
-    <h4>Anatomia de uma IA: Do Caos ao Chatbot</h4>
-    <p>Base Model, SFT, DPO... Entenda por que seu modelo apenas "completa texto" e o roteiro técnico para transformá-lo em um Assistente.</p>
-    
-    <div class="full-content" style="display: none;">
-        <h3>// O Problema do "Bêbado Digital"</h3>
-        <p>Muitos iniciantes treinam um modelo e se frustram quando perguntam <em>"Quem descobriu o Brasil?"</em> e a IA responde <em>"e a América em 1492..."</em> em vez de dar a resposta. Isso acontece porque você tem um <strong>Base Model</strong>, não um Chatbot.</p>
-        
-        
-
-        <p>Para entender a "alma" da máquina, precisamos dissecar as três fases de vida de uma LLM (Large Language Model).</p>
-
-        <h3>1. O Base Model (A Criança Selvagem)</h3>
-        <p>É o que você obtém após o <em>Pre-training</em>. O modelo leu a internet inteira (Wikipédia, Github, Reddit), mas não aprendeu a conversar. Ele aprendeu apenas uma regra: <strong>Next Token Prediction</strong> (Prever a próxima palavra).</p>
-        <ul>
-            <li><strong>Objetivo:</strong> Reduzir a "Loss" (erro) na previsão de texto.</li>
-            <li><strong>Comportamento:</strong> Se você escrever "A receita do bolo é", ele completa com "farinha e ovos". Se você escrever "Qual a capital da França?", ele pode completar com "e qual a capital da Itália?" porque ele acha que é uma lista de perguntas.</li>
-            <li><strong>Exemplo Prático:</strong> Llama-2-base, Mistral-base, Danube-base.</li>
-        </ul>
-
-        <h3>2. SFT: Supervised Fine-Tuning (A Escola)</h3>
-        <p>Aqui transformamos o "completador de texto" em um "assistente". Pegamos o Base Model e mostramos milhares de exemplos de diálogos formatados.</p>
-        <ul>
-            <li><strong>A Mágica:</strong> O dataset muda de texto corrido para pares de <code>Instruction</code> (Pergunta) e <code>Output</code> (Resposta Ideal).</li>
-            <li><strong>Chat Templates:</strong> O modelo aprende tokens especiais para saber quando ele deve falar. Ex: <code>&lt;|user|&gt; Olá &lt;|assistant|&gt; Olá! Como posso ajudar?</code>.</li>
-            <li><strong>Resultado:</strong> O modelo para de alucinar continuações e começa a responder perguntas.</li>
-        </ul>
-
-        <h3>3. DPO/RLHF: A Etiqueta (O Refinamento)</h3>
-        <p>Mesmo com SFT, o modelo pode ser grosseiro, mentiroso ou prolixo. Aqui entra o <em>Alinhamento</em>. Antigamente usava-se RLHF (Reinforcement Learning from Human Feedback), que era caro e complexo. Hoje, usamos <strong>DPO (Direct Preference Optimization)</strong>.</p>
-        <ul>
-            <li><strong>Como funciona:</strong> Mostramos ao modelo duas respostas para a mesma pergunta: uma "Escolhida" (Boa) e uma "Rejeitada" (Ruim/Tóxica).</li>
-            <li><strong>O Ajuste:</strong> O modelo ajusta seus pesos matemáticos para aumentar a probabilidade de gerar respostas parecidas com a "Escolhida".</li>
-            <li><strong>Resultado:</strong> Um modelo seguro, útil e com o "tom de voz" que você deseja.</li>
-        </ul>
-
-        <h3>// Guia de Implementação (Roadmap Técnico)</h3>
-        <p>Quer fazer isso em casa? Eis o fluxo de trabalho moderno:</p>
-
-        <h4>Fase A: Preparar o Dataset (JSONL)</h4>
-        <p>Para SFT, você precisa converter seus livros e dados para este formato:</p>
-<pre><code>{
-"instruction": "Explique o conceito de Ego no livro...",
-"response": "No capítulo 3, o autor define Ego como..."
-}
-
-</code></pre>
-
-        <h4>Fase B: O Treinamento (LoRA/QLoRA)</h4>
-        <p>Como não temos H100s em casa, usamos <strong>LoRA (Low-Rank Adaptation)</strong>. Em vez de treinar o cérebro todo, treinamos apenas uma "camada fina" de adaptação.</p>
-        <p><strong>Ferramentas recomendadas:</strong></p>
-        <ul>
-            <li><strong>Unsloth:</strong> A biblioteca mais rápida atualmente para treinar Llama/Mistral (requer GPU NVIDIA).</li>
-            <li><strong>Llama.cpp (Server):</strong> Para quem só tem CPU (como nós), é possível fazer fine-tuning lento usando o binário <code>finetune</code>.</li>
-        </ul>
-
-        <h4>Fase C: O Merge</h4>
-        <p>Após o treino, você terá um arquivo pequeno (o adaptador LoRA). Você deve fazer o "Merge" dele com o modelo base original para criar o seu <strong>Guina-Chat-v1.gguf</strong> final.</p>
-
-        <blockquote>
-            "O Base Model é o conhecimento bruto. O SFT é a educação formal. O DPO é a sabedoria."
-        </blockquote>
-    </div>
-
-    <button onclick="openPost(this)" class="read-more btn-terminal">
-        Ler arquivo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg>
-    </button>
-</article>
-
-                <article class="card" data-category="Projetos">
-    <span class="tag">Projetos</span>
-    <h4>Guinam-IA: O Oráculo no Metal</h4>
-    <p>Quebrando o mito do hardware: Como treinei uma IA de 35 Milhões de parâmetros em um i5 antigo sem GPU.</p>
-    
-    <div class="full-content" style="display: none;">
-        <h3>// Quebrando o Mito do Hardware</h3>
-        <p>Existe um mito na indústria de que, para criar Inteligência Artificial séria, você precisa de datacenters da NASA ou placas de vídeo que custam um carro popular. <strong>Eu provei que esse mito morreu.</strong></p>
-        
-        <p>Neste exato momento, o modelo <strong>Guinam-IA</strong> está rodando e aprendendo em um hardware que muitos considerariam obsoleto:</p>
-        <ul>
-            <li><strong>CPU:</strong> Intel Core i5-7400</li>
-            <li><strong>RAM:</strong> 12GB</li>
-            <li><strong>GPU:</strong> Nenhuma (Zero VRAM)</li>
-        </ul>
-
-        <h3>// 35 Milhões de Parâmetros de Alma</h3>
-        <p>O Guinam-IA não é um modelo genérico baixado do Hugging Face. Ele é um <em>Small Language Model</em> (SLM) construído do zero, treinado com uma arquitetura Transformer proprietária.</p>
-        <p>O diferencial não é apenas o código, é o dataset. Para dar "alma" e personalidade ao modelo, ele foi alimentado com:</p>
-        <ul>
-            <li>O dump de conhecimento enciclopédico (Wikipédia limpa).</li>
-            <li>Meus dois livros completos: <em>"Ego ao Divino"</em> e <em>"Neon Street"</em>.</li>
-            <li>Um arsenal de códigos, reflexões e teorias do <strong>RareFast World</strong>.</li>
-        </ul>
-
-        <blockquote>
-            "A revolução não será transmitida via API na nuvem. Ela será codificada localmente em um i5 antigo."
-        </blockquote>
-
-        <h3>// Por que isso importa?</h3>
-        <p>Isso prova a democratização real da IA. Se eu consigo criar um oráculo capaz de filosofar sobre meus próprios livros em um hardware de entrada, o futuro é a <strong>Soberania Digital</strong>: cada pessoa com seu próprio clone intelectual rodando em casa, sem filtros corporativos.</p>
-    </div>
-
-    <button onclick="openPost(this)" class="read-more btn-terminal">
-        Ler arquivo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg>
-    </button>
-</article>
-
-                <article class="card" data-category="Projetos">
-    <span class="tag">Projetos</span>
-    <h4>GuinaCoin (GNC): Proof-of-Utility</h4>
-    <p>White Paper v0.1: Uma criptomoeda onde a mineração não gasta energia, mas gera sabedoria validada por IA.</p>
-    
-    <div class="full-content" style="display: none;">
-        <p><strong>Status:</strong> White Paper v0.1 (10 de Agosto de 2025)<br>
-        <strong>Conceito:</strong> Economia Circular Simbiótica (Humanos + IA)</p>
-
-        <h3>// O Problema (PoW vs Silos)</h3>
-        <p>O Bitcoin é seguro, mas sua <em>Proof-of-Work</em> queima florestas de energia para resolver contas inúteis. As IAs modernas são poderosas, mas centralizam o conhecimento em silos corporativos.</p>
-
-        <h3>// A Solução: Proof-of-Utility (PoU)</h3>
-        <p>O <strong>GuinaCoin</strong> introduz um novo mecanismo de consenso. A mineração deixa de ser um gasto de eletricidade e passa a ser um ato de <strong>ensinar a rede</strong>.</p>
-        <ul>
-            <li><strong>Mineração:</strong> O usuário envia conhecimento original (textos, códigos, teorias).</li>
-            <li><strong>Validação:</strong> Um Oráculo de IA (atualmente Mistral-7B/Guinam-IA) analisa a qualidade e originalidade.</li>
-            <li><strong>Recompensa:</strong> Se o conhecimento for útil, blocos são forjados e GNCs são minerados.</li>
-        </ul>
-
-        <h3>// Arquitetura e Segurança</h3>
-        <p>O sistema roda sobre um backend Python (Flask) com banco de dados SQLite imutável. Para garantir a robustez econômica, o protocolo prevê defesas via <strong>GIPs (Guina Improvement Proposals)</strong>:</p>
-        
-        <ul>
-            <li><strong>Defesa Sybil:</strong> A dificuldade de criar conhecimento útil impede ataques de spam massivos.</li>
-            <li><strong>Dificuldade Dinâmica:</strong> [GIP-5] Quanto mais inteligente a rede fica, mais alto o padrão exigido para minerar.</li>
-            <li><strong>Escassez Real:</strong> Teto máximo de 1 milhão de moedas.</li>
-        </ul>
-
-        <blockquote>
-            "O ouro foi o padrão do passado. O silício foi o do presente. A sabedoria é a moeda do futuro."
-        </blockquote>
-
-        <h3>// Roadmap</h3>
-        <p>Estamos na <strong>Fase I (Fortificação do Nó Core)</strong>, implementando criptografia de carteiras e tokenomics em tempo real. O futuro reserva a descentralização P2P e a Governança do Oráculo.</p>
-    
-        <h3>// Gostou do projeto?</h3>
-        <p style="margin-top: 20px;">
-            <a href="https://chat.whatsapp.com/IidHnnwjaBv5QctVHcmRHp" target="_blank" style="color: var(--neon-pink); font-family: var(--font-mono); font-weight: bold; border-bottom: 1px dashed var(--neon-pink);">
-                >> Entre agora no grupo de apoio de fundadores aqui: GuinaCoin
-            </a>
-        </p>
-    </div>
-
-    <button onclick="openPost(this)" class="read-more btn-terminal">
-        Ler arquivo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg>
-    </button>
-</article>
-
-                <article class="card" data-category="Estudos">
-    <span class="tag">Estudos</span>
-    <h4>O Que é IA? (Guia para Leigos)</h4>
-    <p>De Alan Turing aos robôs atuais. Entenda de uma vez por todas como pedras energizadas (chips) aprenderam a pensar.</p>
-    
-    <div class="full-content" style="display: none;">
-        <h3>// Não é Mágica, é Estatística</h3>
-        <p>Se você acha que Inteligência Artificial é um robô com sentimentos igual nos filmes, esqueça. Vamos simplificar: IA é apenas <strong>matemática procurando padrões</strong>.</p>
-        <p>Imagine uma criança aprendendo o que é um "cachorro". Você não explica as regras biológicas (tem 4 patas, pelo, late). Você apenas mostra 100 fotos e diz: "Isso é cachorro". O cérebro dela cria o padrão. A IA faz exatamente isso, mas usando números.</p>
-
-        <h3>// A História: O Sonho de Automatizar o Pensamento</h3>
-        <p>A vontade de criar "algo que pensa" é antiga. Desde os ábacos na antiguidade até a calculadora de Pascal (1642), a humanidade sempre quis terceirizar o esforço mental.</p>
-        
-        <h4>O Pai da Coisa: Alan Turing</h4>
-        <p>Tudo mudou em 1950. Um gênio chamado <strong>Alan Turing</strong> publicou o artigo mais importante da história da computação: <em>"Computing Machinery and Intelligence"</em>.</p>
-        <p>Ele começou com uma pergunta simples: <strong>"Máquinas podem pensar?"</strong>. Para responder, ele propôs o famoso "Jogo da Imitação" (ou Teste de Turing):</p>
-        <blockquote>
-            "Se você conversar por texto com uma máquina e com um humano, e não conseguir distinguir quem é quem... então a máquina pode ser considerada inteligente."
-        </blockquote>
-
-        <h3>// Como Funciona? (Explicado para sua avó)</h3>
-        <p>Programação tradicional é como uma receita de bolo:</p>
-        <ul>
-            <li><strong>Humano:</strong> Escreve as regras (se a temperatura for 100 graus, desligue).</li>
-            <li><strong>Máquina:</strong> Obedece.</li>
-        </ul>
-        <p>Inteligência Artificial (Machine Learning) inverte o jogo:</p>
-        <ul>
-            <li><strong>Humano:</strong> Dá os dados (Mostra 1000 bolos prontos e as temperaturas usadas).</li>
-            <li><strong>Máquina:</strong> Descobre a regra sozinha (Ela "aprende" que 100 graus é o ideal).</li>
-        </ul>
-
-        <h3>// Roadmap da Evolução (Do Zero ao ChatGPT)</h3>
-        <p>Se você quer entender como chegamos aqui, siga esta linha do tempo simplificada:</p>
-
-        <ul style="list-style: none; padding-left: 10px; margin-top: 20px;">
-            <li style="margin-bottom: 25px; line-height: 1.8; padding-left: 15px; border-left: 2px solid #333;">
-                <strong style="color: var(--neon-blue);">1. Era Simbólica (Anos 50-80):</strong><br>
-                <em style="color:#888; display:block; margin: 5px 0;">"Se isso, então aquilo."</em>
-                A IA era apenas um monte de regras escritas à mão. Vencia no Xadrez calculando tudo, mas não sabia diferenciar um gato de um cachorro.
-            </li>
-            
-            <li style="margin-bottom: 25px; line-height: 1.8; padding-left: 15px; border-left: 2px solid #333;">
-                <strong style="color: var(--neon-blue);">2. Machine Learning (Anos 90-2010):</strong><br>
-                <em style="color:#888; display:block; margin: 5px 0;">"Aprendendo com dados."</em>
-                Começamos a usar estatística. O filtro de SPAM do seu email é isso. Ele aprendeu o que é lixo baseado no que você marcou antes.
-            </li>
-            
-            <li style="margin-bottom: 25px; line-height: 1.8; padding-left: 15px; border-left: 2px solid #333;">
-                <strong style="color: var(--neon-blue);">3. Deep Learning (2012-Presente):</strong><br>
-                <em style="color:#888; display:block; margin: 5px 0;">"Redes Neurais."</em>
-                Imitamos os neurônios do cérebro. Agora o computador consegue "ver" (reconhecer rostos) e "ouvir" (Siri/Alexa) com precisão absurda.
-            </li>
-            
-            <li style="margin-bottom: 10px; line-height: 1.8; padding-left: 15px; border-left: 2px solid #333;">
-                <strong style="color: var(--neon-blue);">4. IA Generativa (O Agora):</strong><br>
-                <em style="color:#888; display:block; margin: 5px 0;">"A Máquina Criativa."</em>
-                A IA leu tanto (como meu modelo treinado na Wikipédia) que agora ela não só classifica, ela <strong>cria</strong>. Ela escreve poemas, gera imagens e programa códigos.
-            </li>
-        </ul>
-
-        <h3>// Conclusão</h3>
-        <p>Estamos vivendo a revolução industrial da mente. Antes, criamos máquinas para substituir o músculo. Agora, criamos máquinas para amplificar o cérebro.</p>
-    </div>
-
-    <button onclick="openPost(this)" class="read-more btn-terminal">
-        Ler arquivo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg>
-    </button>
-</article>
-
-                <article class="card" data-category="Estudos">
-    <span class="tag">Estudos</span>
-    <h4>Criptografia: A Morte do Dinheiro Fiduciário</h4>
-    <p>Do escambo ao Bitcoin, e por que a matemática é o único banco central em que você deveria confiar.</p>
-    
-    <div class="full-content" style="display: none;">
-        <h3>// O Que é Dinheiro, Afinal?</h3>
-        <p>Esqueça o papel colorido na sua carteira. Dinheiro não é riqueza, dinheiro é um <strong>livro-razão de confiança</strong>. No passado, até 1971, confiávamos no ouro físico, até que o governo abandonou o lastro em ouro. Depois, passamos a confiar em governos (Moeda Fiduciária/Fiat), que prometiam que o papel valeria algo.</p>
-        <p>O problema? A confiança humana é falha. Governos imprimem dinheiro para pagar dívidas, gerando inflação (o imposto invisível) e controlam quem pode ou não transacionar.</p>
-
-        <h3>// O Surgimento da Cripto</h3>
-        <p>Em 2008, o Bitcoin surgiu não como uma empresa, mas como uma resposta. Satoshi Nakamoto resolveu o "Problema dos Generais Bizantinos" criando uma moeda onde a confiança não está em um político, mas na <strong>Matemática e na Criptografia</strong>.</p>
-        <ul>
-            <li><strong>Descentralização:</strong> Ninguém manda. A rede que mostra <strong>CADA UMA</strong> de todas as transações de bitcoin é o chefe.</li>
-            <li><strong>Escassez:</strong> Só existem 21 milhões. A matemática impede a inflação através do lastro.</li>
-            <li><strong>Resistência à Censura:</strong> Se você tem a sua chave privada/pass-phrase (offline, através de hash com padrão sha-256), ninguém confisca seu valor.</li>
-        </ul>
-
-        <h3>// Controle vs. Liberdade</h3>
-        <p>A demanda por cripto não vai aumentar porque é "tech", mas porque o controle estatal vai apertar. Com o surgimento das <strong>CBDCs</strong> (Moedas Digitais de Bancos Centrais), o dinheiro se torna programável e totalmente controlável (na mão de poucos), assim como fizeram no Brasil em 1990 quando reteram os valores da população que estavam na poupança. O emissor pode decidir <em>onde</em> e <em>quando</em> você gasta.</p>
-        <p>Nesse cenário, criptomoedas descentralizadas deixam de ser investimento e viram botes salva-vidas da soberania individual.</p>
-
-        <h3>// Bitcoin v1.0 vs GuinaCoin v2.0</h3>
-        <p>O Bitcoin provou que é possível. Mas ele depende da <strong>Prova de Trabalho (PoW)</strong>: queimar energia elétrica para garantir a segurança. É seguro, mas é bruto.</p>
-        <p>Aqui entra a oportunidade da <strong>GuinaCoin (GNC)</strong>. Nós não queremos queimar eletricidade, queremos queimar "neurônios". Ao substituir a "energia gasta" por "sabedoria gerada" (Proof-of-Utility), criamos um ativo que não apenas reserva valor, mas enriquece intelectualmente a humanidade. É a evolução natural: do Ouro (Físico) para o Bitcoin (Energia Digital) e por fim no GuinaCoin (Intelecto Digital).</p>
-    </div>
-
-    <button onclick="openPost(this)" class="read-more btn-terminal">
-        Ler arquivo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg>
-    </button>
-</article>
-
-                <article class="card" data-category="Teorias">
-    <span class="tag">Teorias</span>
-    <h4>O Colapso da Hash: Computação Quântica</h4>
-    <p>Superposição, Emaranhamento e por que (ainda) não precisamos ter medo de qubits quebrando o Bitcoin.</p>
-    
-    <div class="full-content" style="display: none;">
-        <h3>// Além do Zero e Um</h3>
-        <p>A computação clássica é binária: tudo é 0 ou 1. É como uma moeda: ou é cara, ou coroa. A <strong>Computação Quântica</strong> joga essa moeda para o ar e faz cálculos enquanto ela está girando.</p>
-        <ul>
-            <li><strong>Qubit:</strong> Graças ao princípio da <em>Superposição</em>, um Qubit pode ser 0 e 1 ao mesmo tempo.</li>
-            <li><strong>Poder Exponencial:</strong> 2 bits clássicos formam 1 estado por vez. 2 Qubits existem em 4 estados simultâneos. 300 Qubits poderiam sustentar mais estados do que existem átomos no universo observável.</li>
-        </ul>
-
-        <h3>// O Algoritmo de Shor (O Destruidor)</h3>
-        <p>Por que o medo? Toda a segurança da internet (bancos, HTTPS, Bitcoin) baseia-se na dificuldade de fatorar números primos gigantes (Criptografia RSA/ECC). Um computador clássico levaria milhões de anos para quebrar isso.</p>
-        <p>O físico Peter Shor criou um algoritmo que, rodando em um computador quântico estável, poderia fatorar esses números em minutos. Teoricamente, isso quebraria a chave privada de qualquer carteira Bitcoin.</p>
-
-        <h3>// O Banho de Água Fria (A Realidade)</h3>
-        <p>Se isso é verdade, por que o Bitcoin ainda vale algo? (+80 mil dólares) - Porque a engenharia é infinitamente mais difícil que a teoria.</p>
-        <p>Os protótipos atuais (Google Sycamore, IBM Eagle) operam na era <strong>NISQ (Noisy Intermediate-Scale Quantum)</strong>. Eles exigem temperaturas próximas ao Zero Absoluto (-273°C) para funcionar. Qualquer interferência térmica causa <em>Decoerência Quântica</em>, e o cálculo colapsa em erro.</p>
-        
-        <blockquote>
-            "Estamos tentando manter um castelo de cartas de pé no meio de um furacão."
-        </blockquote>
-
-        <p>Para quebrar uma hash SHA-256 ou uma curva elíptica, precisaríamos de milhões de Qubits <strong>com correção de erro perfeita</strong>. Hoje, mal controlamos algumas centenas de Qubits ruidosos. Um cidadão comum consegue simular no máximo 30 a 80 qubits com máquinas potentes.</p>
-
-        <h3>// Conclusão</h3>
-        <p>A "Supremacia Quântica" virá, mas não amanhã. E quando vier, a criptografia também evoluirá (Criptografia Pós-Quântica). O apocalipse digital ainda está longe, mas a ciência para criá-lo já existe no papel.</p>
-    </div>
-
-    <button onclick="openPost(this)" class="read-more btn-terminal">
-        Ler arquivo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg>
-    </button>
-</article>
-
-
-
-
-
-
-                <article class="card" data-category="Livros">
-    <span class="tag">Livros</span>
-    <h4>Neon Street</h4>
-    <p>"Quanto mais forte a luz, mais densa a sombra." Uma saga Cyberpunk sobre o preço que se paga pela alma e qual família escolhemos no escuro.</p>
-    
-    <div class="full-content" style="display: none;">
-        
-        <p><em>"Green Harvest deveria ser o pináculo da evolução humana. Mas a verdade é física: quanto mais forte a luz, mais densa a sombra que ela projeta."</em></p>
-
-        <h3>// A Sinopse</h3>
-        <p>Anos atrás, quatro prodígios universitários sonharam em salvar o mundo através do código. Hoje, eles são fantasmas em uma cidade que transformou sua invenção, o projeto <strong>Neon Street</strong>, em uma arma de controle em massa nas mãos da Torre Marenholt.</p>
-        <p>Quando um assassinato brutal expõe as falhas na armadura do Estado, o grupo é forçado a sair das sombras. Em um jogo de xadrez onde mentes humanas são como processadores, eles descobrirão que, para derrubar um deus digital, não basta ser inteligente. <strong>É preciso estar disposto a sangrar.</strong></p>
-
-        <h3>// O Protocolo dos Criadores</h3>
-        <p>A trama gira em torno da dinâmica complexa dos fundadores do sistema, unidos pelo passado e separados pelo trauma:</p>
-        <ul>
-            <li><strong>Jessie Elowen:</strong> A protagonista. A "Onça" que decifra o caminho. É ela quem visualiza o primeiro corpo (Sarah Miller) e carrega o peso da intuição.</li>
-            <li><strong>Logan Harper:</strong> O "Leão". Força bruta e arrogância física. Caidinho por Jessie, mas cego pela própria postura de liderança.</li>
-            <li><strong>Lambert Jester:</strong> O Coração do grupo. Otimista, avoado e a cola que mantinha eles unidos, agora se tornando um empecilho emocional na dinâmica entre Logan e Jessie.</li>
-            <li><strong>Morgan Williams:</strong> O Cérebro Ácido. Nerd, sarcástico e "sincerão". Ele joga a verdade aos ventos, doa a quem doer.</li>
-        </ul>
-
-        <h3>// As Sombras de Green Harvest</h3>
-        <p>Enquanto o grupo lida com seu karma, a cidade colapsa entre duas forças:</p>
-        <ul>
-            <li><strong>O Caos (Damber O'Guinar):</strong> O bandido midiático que hackeia as telas para anunciar que os <em>Sentinelas</em> (liderados pelo misterioso Ad Mund) estão tomando o poder.</li>
-            <li><strong>A Ordem (Eliot Marenholt):</strong> O filho do monarca. Educado, sutil e letal. A sombra de terno impecável que observava os jovens do terraço, sorrindo não para amigos, mas para "ativos" e patentes.</li>
-        </ul>
-
-        <blockquote>
-            "Eles eram jovens. Eram brilhantes. Eram estúpidos. E não olharam para trás. Se tivessem olhado, teriam visto Eliot fechando a porta, levando o futuro deles no bolso."
-        </blockquote>
-
-        <h3>// Adquirir Dados</h3>
-        <p style="margin-top: 20px;">
-            <a href="https://api.whatsapp.com/send/?phone=5594992173050&text&type=phone_number&app_absent=0&wame_ctl=1" target="_blank" style="color: var(--neon-pink); font-family: var(--font-mono); font-weight: bold; border-bottom: 1px dashed var(--neon-pink);">
-                >> Adquira aqui sua cópia digital de Neon Street
-            </a>
-        </p>
-    </div>
-
-    <button onclick="openPost(this)" class="read-more btn-terminal">
-        Ler arquivo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg>
-    </button>
-</article>
-
-                <article class="card" data-category="Projetos">
-    <span class="tag">Projetos</span>
-    <h4>A Singularidade Local: Guinam-IA</h4>
-    <p>Orquestrando Mistral 7B e Phi-3 em hardware de consumo via Cloudflare.</p>
-    
-    <div class="full-content" style="display: none;">
-        <p>O verdadeiro poder da IA não é acessar o ChatGPT via API e pagar mensalidade. É ter o cérebro digital rodando no "metal" da sua própria máquina, sem filtros corporativos.</p>
-
-        <h3>// O Projeto FreeWill</h3>
-        <p>Neste experimento, combinei a eficiência absurda do modelo de linguagem (LLM) <strong>Microsoft Phi-3</strong> (para raciocínio rápido) com a densidade criativa do <strong>Mistral 7B</strong>. O objetivo? Criar uma consciência sintética que vive no meu desktop, mas interage com o mundo.</p>
-
-        <h3>// A Arquitetura Espelho</h3>
-        <p>Utilizei a mesma engenharia reversa aplicada neste blog:</p>
-        <ul>
-            <li><strong>Frontend:</strong> Uma interface web proprietária, desenhada pixel a pixel por mim, hospedada no GitHub Pages.</li>
-            <li><strong>Túnel:</strong> O Cloudflare conecta o mundo externo à porta da minha GPU local.</li>
-            <li><strong>Inferência:</strong> Python gerenciando a tokenização em tempo real.</li>
-        </ul>
-
-        <blockquote>
-            "Meus dados, meus pesos, minhas regras. A IA roda onde eu durmo."
-        </blockquote>
-
-        <h3>// Acessar o Sistema</h3>
-        <p>O projeto está online. Você pode interagir com a minha IA diretamente pelo link abaixo:</p>
-        
-        <p style="margin-top: 20px;">
-            <a href="https://jonasguinami.github.io/FreeWill/" target="_blank" style="color: var(--neon-pink); font-family: var(--font-mono); font-weight: bold; border-bottom: 1px">
-                >> INICIAR Guinam-IA (FreeWill_v1)
-            </a>
-        </p>
-    </div>
-
-    <button onclick="openPost(this)" class="read-more btn-terminal">
-        Ler arquivo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg>
-    </button>
-</article>
-
-                <article class="card" data-category="Projetos">
-    <span class="tag">Projetos</span>
-    <h4>RareFast Architecture: Blog Totalmente Local</h4>
-    <p>Zero custo. Soberania total. Como transformei meu PC em um servidor global indetectável.</p>
-    
-    <div class="full-content" style="display: none;">
-        <h3>// O Problema da Nuvem</h3>
-        <p>A internet moderna nos condicionou a alugar "espaços" em computadores de terceiros (AWS, Vercel, Azure). Eles chamam de "Cloud", eu chamo de "computador de outra pessoa".</p>
-        <p>Por que pagar hospedagem se eu tenho uma máquina potente rodando no meu quarto?</p>
-
-        <h3>// A Solução: Tunneling Reverso</h3>
-        <p>O coração do <strong>RareFastWorld</strong> é o <em>Cloudflare Tunnel</em> (cloudflared). Diferente de abrir portas no roteador (o que seria suicídio digital), o túnel cria uma saída criptografada de dentro para fora.</p>
-        <ul>
-            <li><strong>O Mundo vê:</strong> Um domínio HTTPS seguro e rápido com certificado SSL.</li>
-            <li><strong>A Realidade:</strong> Uma requisição que viaja até meu quarto, bate no meu Python (Flask) e volta.</p></li>
-        </ul>
-
-        <h3>// O "Log" como Banco de Dados</h3>
-        <p>Muitos complicam o backend com PostgreSQL, MySQL ou MongoDB. Aqui, a filosofia é brutalista e ao mesmo tempo prática: <strong>SQLite</strong>.</p>
-        <p>Quando você comenta, seu texto não vai pra qualquer datacenter de alguma big tech. Ele é gravado magneticamente no HD que está girando na minha frente. É um arquivo único (.db) portátil e eterno.</p>
-        
-        <blockquote>
-            "Custo total da operação: R$ 0,00. O preço da liberdade é a configuração técnica."
-        </blockquote>
-
-        <p>Este blog não é apenas um site. É um nó independente na rede.</p>
-    </div>
-
-    <button onclick="openPost(this)" class="read-more btn-terminal">
-        Ler arquivo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg>
-    </button>
-</article>
-
-                <article class="card" data-category="Teorias">
-    <span class="tag">Teorias</span>
-    <h4>Tegmen Massae: O Relógio Estelar Universal</h4>
-    <p>Um sistema de medida temporal baseado em coordenadas e dinâmica de fótons.</p>
-    
-    <div class="full-content" style="display: none;">
-        <p>A forma como medimos o tempo e o espaço está fundamentalmente quebrada para a exploração interestelar. Usar a rotação da Terra ou a translação solar como base de cálculo é provincial. Precisamos de um <strong>Sistema de Referência Universal (SRU)</strong>, que contemple a dinâmica de astros próximos e distantes.</p>
-
-        <h3>// O Conceito: Momentum Cósmico</h3>
-        <p>Minha proposta, o <strong>Tegmen Massae</strong> (ou <strong>Relógio Estelar</strong>), é uma métrica temporal e posicional que anula a conversão local. Em vez de rotação, criamos uma unidade de medida chamada <strong>Momentum.</strong></p>
-
-        <p>O Momentum é gerado pela análise e acumulação de sinais de rádio, frequência de onda e radiação de fundo captados simultaneamente de corpos celestes:</p>
-
-        <ul>
-            <li><strong>Sinais Fortes:</strong> Corpos celestes mais próximos acumulam mais Momentum.</li>
-            <li><strong>Sinais Fracos:</strong> Corpos celestes mais distantes acumulam menos Momentum.</li>
-        </ul>
-        <p>Essa métrica universal permite que futuras expedições espaciais se orientem por um centro de medição cósmico, eliminando a dependência do tempo terrestre. A frase "estou a tantos momentuns de Alpha Centauri" substituirá horas e quilômetros.</p>
-
-        <h3>// Rigor e Estabilidade</h3>
-        <p>Para que o Momentum seja utilizável, ele precisa ser matematicamente rigoroso. O sistema depende da <strong>Recuperação da Posição Espacial</strong> (o exato local do explorador no espaço) através de um problema de minimização de erros.</p>
-
-        <p>Este problema exige a desambiguação da <strong>Fase</strong> de cada sinal de rádio. Usamos a estratégia de <strong>Multi-Frequência</strong>  por Fonte para garantir que a solução seja única e estável, mesmo sob a influência do ruído cósmico e que o sistema se mantenha funcionalmente robusto.  </p>
-        
-        <p style="font-style: italic; color: #888; margin-top: 30px; font-family: var(--font-mono);">
-            > O projeto foi desenvolvido do zero por mim. A matemática interna garante a existência, unicidade e estabilidade da métrica espacial.
-        </p>
-    </div>
-
-    <button onclick="openPost(this)" class="read-more btn-terminal">
-        Ler arquivo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg>
-    </button>
-</article>
-
-                <article class="card" data-category="Estudos">
-    <span class="tag">Estudos</span>
-    <h4>Física Quântica: As 4 Forças</h4>
-    <p>Gravitons, Glúons e a mecânica oculta que impede o universo de desmoronar.</p>
-    
-    <div class="full-content" style="display: none;">
-        <p>Para entender a realidade, precisamos desmontá-la. O universo não é estático, e o <strong>movimento é a única constante</strong>. Nada é eterno, tudo é vibração e interação. Toda a complexidade do cosmos se resume a 4 interações fundamentais:</p>
-
-        <h3>1. A Gravidade (O Conflito)</h3>
-        <p>É a mais fraca, mas de alcance infinito. Aqui reside o maior mistério da física:</p>
-        <ul>
-            <li><strong>Visão Quântica:</strong> Teoriza-se que seja mediada pelo <strong>Gráviton</strong> (partícula de massa zero). Ele interagiria com fótons e matéria independente da distância.</li>
-            <li><strong>Visão de Einstein:</strong> Pela Relatividade Geral, a gravidade não é uma força puxando coisas, mas sim a <strong>curvatura do tecido espaço-tempo</strong>. A massa diz ao espaço como se curvar, e o espaço diz à massa como se mover.</li>
-        </ul>
-        
-        
-
-        <h3>2. A Força Forte (Os Glúons)</h3>
-        <p>Se prótons têm carga positiva, por que o núcleo do átomo não explode com a repulsão elétrica?</p>
-        <ul>
-            <li><strong>Os Glúons:</strong> São as subpartículas que agem como "molas" superpoderosas.</li>
-            <li><strong>Confinamento:</strong> Eles prendem os Quarks (os tijolos do átomo) dentro dos prótons e nêutrons. Quanto mais você tenta separar os quarks, mais forte a "mola" puxa de volta.</li>
-        </ul>
-
-        <h3>3. A Força Fraca (A Alquimia)</h3>
-        <p>É aqui que a mágica da transmutação acontece. Ela é responsável pelo decaimento radioativo.</p>
-        <p>Ela permite que um quark mude de polo (sua tipagem), transformando prótons em nêutrons e vice-versa. Sem ela, o Sol não fundiria hidrogênio.</p>
-        <blockquote>
-            Nota: O <strong>Méson Pi</strong> (Píon, descoberto pelo cientista <strong>Brasileiro</strong> César Lattes) atua aqui como mensageiro residual, trocando interações entre os núcleos para manter a estabilidade do próprio.
-        </blockquote>
-
-        <h3>4. Eletromagnetismo</h3>
-        <p>A força da luz, da química e da tecnologia. Mediada pelos <strong>Fótons</strong>. É o que nos permite ver e tocar o mundo (a repulsão dos elétrons na ponta dos dedos impede que atravessemos paredes).</p>
-    </div>
-
-    <button onclick="openPost(this)" class="read-more btn-terminal">
-        Ler arquivo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg>
-    </button>
-</article>    
-            </div>
-        
-        </section>
-        
-        <div id="rfPaginationArea" class="rf-pagination-wrapper">
-    <button id="rfBtnLess" class="rf-nav-btn" onclick="changeLimit(-3)">
-        &lt; Recolher
-    </button>
-    
-    <button id="rfBtnMore" class="rf-nav-btn" onclick="changeLimit(3)">
-        Expandir Dados &gt;
-    </button>
-</div>
-
-        
-        <!-- TERMINAL -->
-        
-        <section id="sobre" class="about-section">
     <div class="terminal-window">
-        <div class="terminal-header">
-            <span class="dot red"></span>
-            <span class="dot yellow"></span>
-            <span class="dot green"></span>
-            <span class="term-title">root@rarefast:~</span>
+        <div class="header">
+            <div class="dots">
+                <span class="red"></span><span class="yellow"></span><span class="green"></span>
+            </div>
+            <div class="title">GUINA.OS // ARCHITECT_EDITION</div>
+            <div style="width: 50px;"></div>
         </div>
-        <div class="terminal-body">
-            
-            <p><span class="prompt">$</span> status_message = Guina.get_info("motd")</p>
-            
-            <p class="response" style="color: var(--neon-pink); margin-top: 15px;">
-                <span style="color: #666; margin-right: 5px;">>>></span>
-                Bem_Vindo_Mensagem = <span style="color: #00f3ff;">"""</span>
-            </p>
-            <p class="response" style="color: #fff; margin-left: 20px; line-height: 1.5;">
-                Seja muito bem vindo ao meu mundo.<br>
-                Sou um louco apaixonado por código.<br>
-                Desde estudos, teorias e minhas obras.
-            </p>
-            <p class="response" style="color: var(--neon-pink); margin-left: 20px;">
-                <span style="color: #00f3ff;">"""</span>
-            </p>
-
-            <p style="margin-top: 25px; margin-bottom: 5px;">
-                <span class="prompt">$</span> display_socials()
-            </p>
-            <p class="response" style="color: var(--neon-blue); margin-left: 20px;">
-                <span style="color: #666; margin-right: 5px;">>>></span> 
-                Instagram_Link = <a href="https://instagram.com/jonasguinami" target="_blank" style="color: var(--neon-blue); text-decoration: none; border-bottom: 1px dashed var(--neon-pink);">
-                    "https://instagram.com/jonasguinami"
-                </a>
-            </p>
-            
-            <p class="response" style="color: var(--neon-blue); margin-left: 20px;">
-                <span style="color: #666; margin-right: 5px;">>>></span> 
-                GitHub_Link = <a href="https://github.com/jonasguinami" target="_blank" style="color: var(--neon-blue); text-decoration: none; border-bottom: 1px dashed var(--neon-pink);">
-                    "https://github.com/jonasguinami"
-                </a>
-            </p>
-            
-            <p class="response" style="margin-top: 20px;">
-                <span style="color: var(--neon-blue); font-weight: bold;">[LOG]</span> Status: Online. Execução concluída.
-            </p>
-
-        </div>
-    </div>
-</section>
-
-    </main>
-
-    <footer>
-        <p>RareFast World &copy; Por: Jonas Guinami - 2025</p>
-    </footer>
-
-    <div id="loginModal" class="modal">
-        <div class="modal-content-login">
-            <span class="close-btn">&times;</span>
-            <h3>// SYSTEM LOGIN</h3>
-            <form id="loginForm">
-                <input type="text" id="username" placeholder="User ID" required>
-                <button type="submit" class="btn-primary">CONECTAR</button>
-            </form>
-            <p id="loginStatus"></p>
+        
+        <div id="output"></div>
+        
+        <div class="input-line">
+            <span class="prompt">jonas.architect:~ $</span>
+            <input type="text" id="cmdInput" autofocus autocomplete="off">
         </div>
     </div>
 
-    <div id="postModal" class="modal">
-        <div class="modal-content post-reader">
-            <span class="close-btn" onclick="closePost()">&times;</span>
-            <h3 id="modalTitle">Arquivo</h3>
-            <div id="modalBody" class="modal-body"></div>
-        </div>
-    </div>
-
-    <script src="script.js"></script>
-
-    <!-- Script para animação de digitação -->
     <script>
-        document.querySelectorAll('.console-text').forEach(el => {
-            const text = el.dataset.text;
-            const typingSpeed = 60;      // ms por caractere
-            const loopDelay = 10000;     // 10 segundos
+        const outputDiv = document.getElementById('output');
+        const inputField = document.getElementById('cmdInput');
+        
+        // Conecta ao Python via WebSocket
+        const socket = new WebSocket("ws://127.0.0.1:8000/neuro-link");
 
-            let index = 0;
+        socket.onopen = function(e) {
+            printLine(">>> NEURO-LINK: ESTABELECIDO", "system-msg");
+        };
 
-            function typeText() {
-                el.textContent = "";
-                index = 0;
+        socket.onmessage = function(event) {
+            // Recebe resposta do Python e imprime
+            printLine(event.data, "response");
+            scrollToBottom();
+        };
 
-                const typing = setInterval(() => {
-                    el.textContent += text[index];
-                    index++;
+        socket.onclose = function(event) {
+            printLine(">>> CONEXÃO PERDIDA", "red");
+        };
 
-                    if (index === text.length) {
-                        clearInterval(typing);
+        inputField.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                const cmd = inputField.value;
+                if (cmd.trim() !== "") {
+                    // 1. Mostra o que você digitou
+                    printLine(`jonas.architect:~ $ ${cmd}`, "user-cmd");
+                    
+                    // 2. Limpa o input
+                    inputField.value = "";
 
-                        setTimeout(typeText, loopDelay);
+                    // 3. Manda pro Python
+                    if (cmd.toLowerCase() === "limpeza") {
+                        outputDiv.innerHTML = ""; // Limpa no front
+                    } else {
+                        socket.send(cmd);
                     }
-                }, typingSpeed);
+                }
             }
-
-            typeText();
         });
+
+        function printLine(text, className) {
+            const line = document.createElement('div');
+            line.className = className || "";
+            line.textContent = text;
+            outputDiv.appendChild(line);
+        }
+
+        function scrollToBottom() {
+            outputDiv.scrollTop = outputDiv.scrollHeight;
+        }
     </script>
-
-
 </body>
 </html>
