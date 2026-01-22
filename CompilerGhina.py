@@ -14,7 +14,6 @@ class GuinaSecurity:
         self.char_map = dict(zip(self.charset_padrao, vals))
 
     def encriptar_byte(self, val):
-        # [CORREÇÃO CRÍTICA]: Era % 255, agora é % 256.
         # Isso impede que o comando 0xFF (255) vire 0x00.
         return (val % 256) ^ self.CHAVE_MESTRA
 
@@ -71,4 +70,5 @@ def compilar(arquivo_fonte):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2: print("uso: python CompilerGhina_v4_Hotfix.py <arquivo.ghina>")
+
     else: compilar(sys.argv[1])
