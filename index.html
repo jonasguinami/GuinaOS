@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>Jonas.Architect | Neural Terminal</title>
     <style>
-    /* Reset Global de Engenharia */
     * {
         box-sizing: border-box;
         outline: none;
@@ -12,7 +11,7 @@
 
     :root {
         --bg-color: #050510;
-        --glass: rgba(20, 20, 35, 0.75); /* Um pouco mais escuro para leitura */
+        --glass: rgba(20, 20, 35, 0.75); 
         --glass-border: rgba(255, 255, 255, 0.1);
         --neon-blue: #00f3ff;
         --neon-purple: #bc13fe;
@@ -24,25 +23,23 @@
         margin: 0;
         padding: 0;
         background-color: var(--bg-color);
-        /* Background Cyberpunk Sutil */
         background-image: 
             radial-gradient(circle at 15% 50%, rgba(188, 19, 254, 0.15) 0%, transparent 25%),
             radial-gradient(circle at 85% 30%, rgba(0, 243, 255, 0.15) 0%, transparent 25%);
         color: var(--text-color);
         font-family: var(--font-stack);
-        /* Usar dvh (Dynamic Viewport Height) para mobile */
         height: 100dvh; 
         width: 100vw;
         display: flex;
         justify-content: center;
         align-items: center;
-        overflow: hidden; /* Impede scroll na página inteira */
+        overflow: hidden;
     }
 
-    /* O Container "Vidro" */
+    /* Container de Vidro */
     .terminal-window {
         width: 85%;
-        max-width: 1200px; /* Limite para telas ultrawide */
+        max-width: 1200px; 
         height: 85%;
         background: var(--glass);
         backdrop-filter: blur(16px);
@@ -66,7 +63,7 @@
         justify-content: space-between;
         align-items: center;
         border-bottom: 1px solid var(--glass-border);
-        flex-shrink: 0; /* Impede que o header encolha */
+        flex-shrink: 0; 
     }
 
     .dots {
@@ -92,17 +89,15 @@
         text-transform: uppercase;
     }
 
-    /* Área de Output (Onde o texto aparece) */
+    /* Área de Output */
     #output {
-        flex: 1; /* Ocupa todo o espaço restante */
+        flex: 1;
         padding: 20px;
         overflow-y: auto;
         white-space: pre-wrap;
         font-size: 1rem;
         line-height: 1.6;
         text-shadow: 0 0 4px rgba(0, 243, 255, 0.15);
-        
-        /* Scrollbar suave */
         scroll-behavior: smooth;
     }
 
@@ -111,21 +106,21 @@
     .user-cmd { color: var(--neon-blue); font-weight: bold; margin-top: 5px; display: block; }
     .response { color: var(--text-color); margin-bottom: 5px; }
 
-    /* Área de Input (Rodapé fixo) */
+    /* Área de Input */
     .input-line {
         display: flex;
-        align-items: center; /* CENTRALIZA VERTICALMENTE O TEXTO */
+        align-items: center; 
         padding: 15px 20px;
         background: rgba(0, 0, 0, 0.4);
         border-top: 1px solid var(--glass-border);
-        min-height: 60px; /* Altura mínima para toque no mobile */
+        min-height: 60px; 
     }
 
     .prompt {
         color: var(--neon-blue);
         margin-right: 12px;
         font-weight: bold;
-        white-space: nowrap; /* Impede que o prompt quebre linha */
+        white-space: nowrap;
     }
 
     input {
@@ -134,29 +129,27 @@
         color: white;
         font-family: var(--font-stack);
         font-size: 1rem;
-        flex: 1; /* Ocupa o resto da linha */
+        flex: 1;
         height: 100%;
         padding: 0;
     }
 
-    /* Custom Scrollbar (Estilo Hacker) */
+    /* Custom Scrollbar */
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
     ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.4); }
 
-    /* =========================================
-       MEDIA QUERIES (MOBILE PERFEITO)
-       ========================================= */
+    /* MEDIA QUERIES */
     @media (max-width: 768px) {
         body {
-            align-items: flex-end; /* No mobile, empurra pro fundo por causa do teclado */
+            align-items: flex-end; 
         }
 
         .terminal-window {
             width: 100%;
-            height: 100%; /* Ocupa tela cheia */
-            border-radius: 0; /* Remove bordas arredondadas */
+            height: 100%; 
+            border-radius: 0; 
             border: none;
             box-shadow: none;
         }
@@ -166,11 +159,11 @@
         }
 
         .title {
-            font-size: 0.75rem; /* Título menor */
+            font-size: 0.75rem;
         }
 
         #output {
-            font-size: 0.95rem; /* Texto levemente menor */
+            font-size: 0.95rem; 
             padding: 15px;
         }
 
@@ -185,7 +178,7 @@
         }
 
         input {
-            font-size: 1rem; /* Mantém 16px para evitar zoom do iPhone no input */
+            font-size: 1rem;
         }
     }
 </style>
@@ -262,4 +255,5 @@
         }
     </script>
 </body>
+
 </html>
