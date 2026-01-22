@@ -6,9 +6,8 @@ import random
 import time
 import psutil
 
-# ==========================================
-# CAMADA 0: CRIPTOGRAFIA (SEED 2026)
-# ==========================================
+# CAMADA 0: CRIPTOGRAFIA 
+
 class GuinaSecurity:
     def __init__(self):
         self.CHAVE_MESTRA = 0xB7
@@ -40,9 +39,9 @@ class GuinaSecurity:
     def decriptar_byte(self, val_encriptado):
         return (val_encriptado ^ self.CHAVE_MESTRA)
 
-# ==========================================
+
 # CAMADA 1: VFS (SISTEMA DE ARQUIVOS)
-# ==========================================
+
 
 class GuinaVFS:
     def __init__(self, sec):
@@ -99,7 +98,6 @@ class GuinaVFS:
         return f"[MEMORIA] '{nome}' gravado."
 
     def extrair(self, nome):
-        # O MÉTODO QUE ESTAVA FALTANDO!
         alvo = self._get_alvo()
         if nome in alvo:
             if alvo[nome]["tipo"] == "binario":
@@ -127,9 +125,8 @@ class GuinaVFS:
             t = "[SETOR]" if v["tipo"] == "setor" else f"[{v['tipo'].upper()}]"
             print(f"   {t:<12} {k}")
 
-# ==========================================
 # CAMADA 2: CPU VIRTUAL (PROCESSADOR)
-# ==========================================
+
 class GuinaCPU:
     def __init__(self, security):
         self.sec = security
@@ -181,9 +178,7 @@ class GuinaCPU:
                 print(f"[CPU PANIC] Instrução corrompida: {hex(opcode)}")
                 self.running_process = False
 
-# ==========================================
 # CAMADA 3: KERNEL (SHELL)
-# ==========================================
 
 class GuinaKernel:
     def __init__(self):
@@ -197,7 +192,8 @@ class GuinaKernel:
         acao = partes[0].lower()
         param = partes[1] if len(partes) > 1 else None
 
-        # --- SISTEMA E AJUDA ---
+        # SISTEMA E AJUDA 
+        
         if acao == "help":
             print("\n=== GUINA PROTOCOL v3.3 (OFFICIAL MANUAL) ===")
             print(" [ESTRUTURA] ")
@@ -238,7 +234,7 @@ class GuinaKernel:
             print(f" STATUS NÚCLEO :: OPERACIONAL (ESTÁVEL)")
             print("========================================\n")
 
-        # --- MANUTENÇÃO DO EXTRAIR (O QUE ESTAVA DANDO ERRO) ---
+        # MANUTENÇÃO DO EXTRAIR
         elif acao == "extrair":
             if param:
                 txt = self.vfs.extrair(param)
@@ -248,7 +244,7 @@ class GuinaKernel:
             else: 
                 print("[ERRO] informe o nome do arquivo para extração.")
 
-        # --- NAVEGAÇÃO E EXPLORAÇÃO ---
+        # NAVEGAÇÃO E EXPLORAÇÃO
         elif acao == "sonar": 
             self.vfs.sonar()
 
@@ -260,11 +256,11 @@ class GuinaKernel:
             if param: self.vfs.orbitar(param)
             else: print("[ERRO] setor alvo necessário.")
 
-        # --- MANIPULAÇÃO DE DADOS (CORRIGIDO) ---
+        # MANIPULAÇÃO DE DADOS
         elif acao == "gravar":
-            # Agora apenas avisa (o server.py cuida do resto)
+            # Apenas avisa o server.py
             if param:
-                pass # O servidor intercepta e faz a mágica
+                pass # O servidor intercepta 
             else: 
                 print("[ERRO] informe o nome do arquivo.")
 
@@ -279,7 +275,7 @@ class GuinaKernel:
             if param: self.vfs.pulverizar(param)
             else: print("[ERRO] o que você deseja pulverizar?")
 
-        # --- EXECUÇÃO E BINÁRIOS ---
+        # EXECUÇÃO E BINÁRIOS
         elif acao == "importar":
             if param and os.path.exists(param):
                 with open(param, 'r') as f:
@@ -302,7 +298,7 @@ class GuinaKernel:
         else: 
             print(f"[ERRO] comando '{acao}' desconhecido. digite 'help'.")
 
-# Permite rodar o Kernel sozinho sem o WebServer se quiser testar rápido
+# Roda o Kernel sozinho sem o WebServer
 if __name__ == "__main__":
     k = GuinaKernel()
     print("--- GUINA OS TERMINAL MODE ---")
@@ -311,4 +307,5 @@ if __name__ == "__main__":
             cmd = input("jonas.architect $ ")
             k.interpretar(cmd)
         except KeyboardInterrupt:
+
             break
