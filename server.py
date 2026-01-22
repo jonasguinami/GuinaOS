@@ -5,24 +5,21 @@ import io
 
 app = FastAPI()
 
-# --- ADAPTADOR WEB PARA O KERNEL ---
-# Precisamos capturar o 'print' do Kernel e mandar pro navegador
+# ADAPTADOR WEB PARA O KERNEL 
 class WebKernel(GuinaKernel):
     def __init__(self):
         super().__init__()
         self.output_buffer = []
 
-    # Sobrescrevemos o boot para não limpar a tela do servidor real
     def boot(self):
         return "--- SISTEMA INICIADO VIA WEB-LINK ---"
 
-    # Método personalizado para processar e capturar a resposta
     def processar_comando_web(self, comando):
-        # 1. Redireciona o stdout (print) para nossa variável
+        # 1. Redireciona o stdout (print) para variável
         capture = io.StringIO()
         sys.stdout = capture
         
-        # 2. Executa o comando do seu Kernel original
+        # 2. Executa o comando do Kernel original
         try:
             self.interpretar(comando)
         except SystemExit:
@@ -37,8 +34,6 @@ class WebKernel(GuinaKernel):
 
 # Instância global do Kernel
 sistema = WebKernel()
-
-# No server.py, altere o loop principal:
 
 estado = {"escrita": False, "arquivo": "", "math": False}
 
@@ -93,4 +88,5 @@ async def websocket_endpoint(websocket: WebSocket):
             await websocket.send_text(capture.getvalue() or f"Comando '{cmd}' executado.")
 
         except Exception as e:
+
             break
