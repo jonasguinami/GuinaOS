@@ -1,5 +1,5 @@
 ; =======; ================================================
-; PROTOCOLO DE DUPLICAÇÃO DE MATÉRIA (v1.1 Stable)
+; PROTOCOLO DE DUPLICAÇÃO DE MATÉRIA 
 ; Autor: jonas.architect
 ; Objetivo: Teste de Stress da CPU Virtual
 ; ================================================
@@ -8,4 +8,5 @@ captar           ; [0x50] Aguarda input do sensor (Reg A)
 duplicar         ; [0x11] Copia Reg A para Reg B
 fundir           ; [0x20] Soma (A + B) -> Dobra o valor
 projetar         ; [0x60] Exibe o resultado holográfico
-encerrar         ; [0xFF] Desliga o ciclo (Agora corrigido!)
+
+encerrar         ; [0xFF] Desliga o ciclo 
